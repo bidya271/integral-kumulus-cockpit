@@ -41,9 +41,9 @@ export const AttentionCenter: React.FC<AttentionCenterProps> = ({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Action &amp; Attention Queue</span>
-          <span className="text-xs text-slate-500">·</span>
-          <span className="text-xs text-slate-400">High-priority triage to complete before lunch</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-integral-midnight-200">Action &amp; Attention Queue</span>
+          <span className="text-xs text-integral-midnight-400">·</span>
+          <span className="text-xs text-integral-midnight-300">High-priority triage to complete before lunch</span>
         </div>
       </div>
 
@@ -55,7 +55,7 @@ export const AttentionCenter: React.FC<AttentionCenterProps> = ({
           {/* 1. AUTOHAUS BRANDL 12:00 DEADLINE */}
           <div className={`p-4 rounded-xl border transition flex flex-col justify-between ${
             isAutohausApproved
-              ? 'bg-slate-900/40 border-slate-800 opacity-60'
+              ? 'bg-integral-midnight-800/40 border-integral-midnight-500/20 opacity-60'
               : 'bg-amber-950/20 border-amber-500/40 shadow-xs'
           }`}>
             <div>
@@ -76,15 +76,15 @@ export const AttentionCenter: React.FC<AttentionCenterProps> = ({
                 )}
               </div>
 
-              <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+              <p className="text-xs text-integral-midnight-200 mt-2 leading-relaxed">
                 Estimate <strong>€3,860 net</strong> is under Dekra (€3,910). Reserved repair slot today at 13:00 expires at 12:00 without written approval.
               </p>
             </div>
 
-            <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <div className="mt-3 pt-2.5 border-t border-integral-midnight-500/20 flex items-center justify-between text-xs">
               <button
                 onClick={() => onSelectClaim('KS-26-104234')}
-                className="text-slate-400 hover:text-white flex items-center space-x-1"
+                className="text-integral-midnight-300 hover:text-white flex items-center space-x-1"
               >
                 <span>Inspect</span>
                 <ArrowRight className="w-3 h-3" />
@@ -109,7 +109,7 @@ export const AttentionCenter: React.FC<AttentionCenterProps> = ({
           {/* 2. TOM CLARKE MOBILITY OVERAGE */}
           <div className={`p-4 rounded-xl border transition flex flex-col justify-between ${
             isTomClarkeEscalated
-              ? 'bg-slate-900/40 border-slate-800 opacity-60'
+              ? 'bg-integral-midnight-800/40 border-integral-midnight-500/20 opacity-60'
               : 'bg-rose-950/20 border-rose-500/40 shadow-xs'
           }`}>
             <div>
@@ -130,15 +130,15 @@ export const AttentionCenter: React.FC<AttentionCenterProps> = ({
                 )}
               </div>
 
-              <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+              <p className="text-xs text-integral-midnight-200 mt-2 leading-relaxed">
                 Customer requested rental extension to July 22 (21 days). Naive AI promised free rental, violating 14-day limit without Team Lead sign-off.
               </p>
             </div>
 
-            <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <div className="mt-3 pt-2.5 border-t border-integral-midnight-500/20 flex items-center justify-between text-xs">
               <button
                 onClick={() => onSelectClaim('KS-26-104413')}
-                className="text-slate-400 hover:text-white flex items-center space-x-1"
+                className="text-integral-midnight-300 hover:text-white flex items-center space-x-1"
               >
                 <span>Inspect Diff</span>
                 <ArrowRight className="w-3 h-3" />
@@ -163,41 +163,41 @@ export const AttentionCenter: React.FC<AttentionCenterProps> = ({
         </div>
 
         {/* RIGHT COLUMN: HIGH-CONVICTION BATCH DISPATCHES (7 COLS) */}
-        <div className="lg:col-span-7 bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl p-4 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+            <div className="flex items-center justify-between pb-3 border-b border-integral-midnight-500/20">
               <div className="flex items-center space-x-2">
-                <Zap className="w-4 h-4 text-sky-400" />
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-200">Autonomous Batch Operations</span>
+                <Zap className="w-4 h-4 text-integral-copper-400" />
+                <span className="text-xs font-bold uppercase tracking-wider text-white">Autonomous Batch Operations</span>
               </div>
-              <span className="text-[11px] text-slate-400 font-mono">198 Claims Eligible</span>
+              <span className="text-[11px] text-integral-midnight-300 font-mono">198 Claims Ready</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3">
               
               {/* BATCH 1: DEDUPLICATION */}
-              <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-lg flex flex-col justify-between">
+              <div className="p-3 bg-integral-midnight-900/80 border border-integral-midnight-500/20 rounded-lg flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between text-xs font-semibold text-slate-200 mb-1">
                     <span className="flex items-center space-x-1.5">
-                      <Merge className="w-3.5 h-3.5 text-indigo-400" />
+                      <Merge className="w-3.5 h-3.5 text-integral-copper-400" />
                       <span>Rule 4 Deduplication</span>
                     </span>
-                    <span className="text-[11px] font-mono text-slate-400">21 Pairs</span>
+                    <span className="text-[11px] font-mono text-integral-midnight-400">21 Pairs</span>
                   </div>
-                  <p className="text-[11px] text-slate-400 leading-snug">
+                  <p className="text-[11px] text-integral-midnight-300 leading-snug">
                     Auto-merge 42 multi-channel duplicate submissions and silence redundant replies.
                   </p>
                 </div>
-                <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center justify-between">
+                <div className="mt-2.5 pt-2 border-t border-integral-midnight-500/20 flex items-center justify-between">
                   <span className="text-[10px] text-emerald-400 font-mono">+10.5 hrs</span>
                   <button
                     onClick={onMergeDuplicates}
                     disabled={isDuplicatesMerged}
                     className={`px-2.5 py-1 text-[11px] font-medium rounded transition ${
                       isDuplicatesMerged
-                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                        : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                        ? 'bg-integral-midnight-700 text-integral-midnight-400 cursor-not-allowed'
+                        : 'bg-integral-copper-600 hover:bg-integral-copper-500 text-white shadow-xs'
                     }`}
                   >
                     {isDuplicatesMerged ? 'Merged' : 'Merge All'}
@@ -206,28 +206,28 @@ export const AttentionCenter: React.FC<AttentionCenterProps> = ({
               </div>
 
               {/* BATCH 2: HAFTPFLICHT HALT */}
-              <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-lg flex flex-col justify-between">
+              <div className="p-3 bg-integral-midnight-900/80 border border-integral-midnight-500/20 rounded-lg flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between text-xs font-semibold text-slate-200 mb-1">
                     <span className="flex items-center space-x-1.5">
                       <ShieldCheck className="w-3.5 h-3.5 text-red-400" />
                       <span>Halt Liability Drafts</span>
                     </span>
-                    <span className="text-[11px] font-mono text-slate-400">33 Claims</span>
+                    <span className="text-[11px] font-mono text-integral-midnight-400">33 Claims</span>
                   </div>
-                  <p className="text-[11px] text-slate-400 leading-snug">
+                  <p className="text-[11px] text-integral-midnight-300 leading-snug">
                     Stop false AI promises for policyholders with zero storm coverage.
                   </p>
                 </div>
-                <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center justify-between">
+                <div className="mt-2.5 pt-2 border-t border-integral-midnight-500/20 flex items-center justify-between">
                   <span className="text-[10px] text-emerald-400 font-mono">+8.25 hrs</span>
                   <button
                     onClick={onQuarantineHaftpflicht}
                     disabled={isHaftpflichtQuarantined}
                     className={`px-2.5 py-1 text-[11px] font-medium rounded transition ${
                       isHaftpflichtQuarantined
-                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                        : 'bg-red-600 hover:bg-red-500 text-white'
+                        ? 'bg-integral-midnight-700 text-integral-midnight-400 cursor-not-allowed'
+                        : 'bg-red-600 hover:bg-red-500 text-white shadow-xs'
                     }`}
                   >
                     {isHaftpflichtQuarantined ? 'Quarantined' : 'Halt 33 Drafts'}
@@ -236,28 +236,28 @@ export const AttentionCenter: React.FC<AttentionCenterProps> = ({
               </div>
 
               {/* BATCH 3: KLARSICHT GLASS DISPATCH */}
-              <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-lg flex flex-col justify-between">
+              <div className="p-3 bg-integral-midnight-900/80 border border-integral-midnight-500/20 rounded-lg flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between text-xs font-semibold text-slate-200 mb-1">
                     <span className="flex items-center space-x-1.5">
                       <Send className="w-3.5 h-3.5 text-emerald-400" />
                       <span>Rule 5 Glass Emergency</span>
                     </span>
-                    <span className="text-[11px] font-mono text-slate-400">117 Claims</span>
+                    <span className="text-[11px] font-mono text-integral-midnight-400">117 Claims</span>
                   </div>
-                  <p className="text-[11px] text-slate-400 leading-snug">
+                  <p className="text-[11px] text-integral-midnight-300 leading-snug">
                     Send on-site mobile booking links for partner Klarsicht Autoglas.
                   </p>
                 </div>
-                <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center justify-between">
+                <div className="mt-2.5 pt-2 border-t border-integral-midnight-500/20 flex items-center justify-between">
                   <span className="text-[10px] text-emerald-400 font-mono">+19.5 hrs</span>
                   <button
                     onClick={onDispatchGlass}
                     disabled={isGlassDispatched}
                     className={`px-2.5 py-1 text-[11px] font-medium rounded transition ${
                       isGlassDispatched
-                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                        : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                        ? 'bg-integral-midnight-700 text-integral-midnight-400 cursor-not-allowed'
+                        : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs'
                     }`}
                   >
                     {isGlassDispatched ? 'Dispatched' : 'Dispatch Links'}
@@ -266,28 +266,28 @@ export const AttentionCenter: React.FC<AttentionCenterProps> = ({
               </div>
 
               {/* BATCH 4: DEKRA MASS INSPECTION */}
-              <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-lg flex flex-col justify-between">
+              <div className="p-3 bg-integral-midnight-900/80 border border-integral-midnight-500/20 rounded-lg flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between text-xs font-semibold text-slate-200 mb-1">
                     <span className="flex items-center space-x-1.5">
                       <CheckSquare className="w-3.5 h-3.5 text-sky-400" />
                       <span>Rule 6 Dekra Drive-In</span>
                     </span>
-                    <span className="text-[11px] font-mono text-slate-400">39 Claims</span>
+                    <span className="text-[11px] font-mono text-integral-midnight-400">39 Claims</span>
                   </div>
-                  <p className="text-[11px] text-slate-400 leading-snug">
-                    Batch schedule drivable hail claims into Munich Mass Drive-In Center.
+                  <p className="text-[11px] text-integral-midnight-300 leading-snug">
+                    Batch schedule drivable hail claims into Munich Mass Assessment Center.
                   </p>
                 </div>
-                <div className="mt-2.5 pt-2 border-t border-slate-800/60 flex items-center justify-between">
+                <div className="mt-2.5 pt-2 border-t border-integral-midnight-500/20 flex items-center justify-between">
                   <span className="text-[10px] text-emerald-400 font-mono">+6.5 hrs</span>
                   <button
                     onClick={onDispatchDekra}
                     disabled={isDekraDispatched}
                     className={`px-2.5 py-1 text-[11px] font-medium rounded transition ${
                       isDekraDispatched
-                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                        : 'bg-sky-600 hover:bg-sky-500 text-white'
+                        ? 'bg-integral-midnight-700 text-integral-midnight-400 cursor-not-allowed'
+                        : 'bg-sky-600 hover:bg-sky-500 text-white shadow-xs'
                     }`}
                   >
                     {isDekraDispatched ? 'Scheduled' : 'Schedule All'}

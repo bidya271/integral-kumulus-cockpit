@@ -199,7 +199,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-sky-500 selection:text-white">
+    <div className="min-h-screen bg-integral-midnight-900 text-integral-midnight-100 flex flex-col font-sans selection:bg-integral-copper-600 selection:text-white">
       
       {/* Top Header */}
       <Header
@@ -247,13 +247,13 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             
             {/* Segmented Category Filter */}
-            <div className="flex items-center space-x-1 p-1 bg-slate-900 border border-slate-800 rounded-xl text-xs overflow-x-auto">
+            <div className="flex items-center space-x-1.5 p-1 bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl text-xs overflow-x-auto">
               <button
                 onClick={() => setFilterCategory('all')}
                 className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap ${
                   filterCategory === 'all'
-                    ? 'bg-slate-800 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-integral-copper-600 text-white shadow-xs'
+                    : 'text-integral-midnight-300 hover:text-white'
                 }`}
               >
                 All (270)
@@ -263,7 +263,7 @@ export default function Home() {
                 className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
                   filterCategory === 'urgent'
                     ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                    : 'text-slate-400 hover:text-amber-400'
+                    : 'text-integral-midnight-300 hover:text-amber-400'
                 }`}
               >
                 <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
@@ -274,7 +274,7 @@ export default function Home() {
                 className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
                   filterCategory === 'human'
                     ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                    : 'text-slate-400 hover:text-rose-400'
+                    : 'text-integral-midnight-300 hover:text-rose-400'
                 }`}
               >
                 <UserCheck className="w-3.5 h-3.5 text-rose-400" />
@@ -285,7 +285,7 @@ export default function Home() {
                 className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
                   filterCategory === 'autonomous'
                     ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                    : 'text-slate-400 hover:text-emerald-400'
+                    : 'text-integral-midnight-300 hover:text-emerald-400'
                 }`}
               >
                 <Bot className="w-3.5 h-3.5 text-emerald-400" />
@@ -295,19 +295,19 @@ export default function Home() {
                 onClick={() => setFilterCategory('duplicates')}
                 className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
                   filterCategory === 'duplicates'
-                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
-                    : 'text-slate-400 hover:text-indigo-400'
+                    ? 'bg-integral-copper-500/20 text-integral-copper-300 border border-integral-copper-500/30'
+                    : 'text-integral-midnight-300 hover:text-integral-copper-400'
                 }`}
               >
-                <Merge className="w-3.5 h-3.5 text-indigo-400" />
+                <Merge className="w-3.5 h-3.5 text-integral-copper-400" />
                 <span>Duplicates (21)</span>
               </button>
               <button
                 onClick={() => setFilterCategory('pre_storm')}
                 className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap ${
                   filterCategory === 'pre_storm'
-                    ? 'bg-slate-800 text-white shadow-xs'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-integral-midnight-700 text-white shadow-xs'
+                    : 'text-integral-midnight-300 hover:text-white'
                 }`}
               >
                 Pre-Storm (60)
@@ -316,24 +316,24 @@ export default function Home() {
 
             {/* Search Input */}
             <div className="relative min-w-[280px]">
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-integral-midnight-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Filter by plate, name, claim ID..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 transition"
+                className="w-full bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-integral-midnight-400 focus:outline-none focus:border-integral-copper-500 transition"
               />
             </div>
 
           </div>
 
           {/* Clean Claims Ledger Table */}
-          <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl overflow-hidden shadow-xs">
+          <div className="bg-integral-midnight-800/60 border border-integral-midnight-500/20 rounded-xl overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-slate-800/80 bg-slate-900/60 text-slate-400 font-mono uppercase tracking-wider text-[11px]">
+                  <tr className="border-b border-integral-midnight-500/20 bg-integral-midnight-950/60 text-integral-midnight-300 font-mono uppercase tracking-wider text-[11px]">
                     <th className="py-3 px-4 font-medium">Claim &amp; Channel</th>
                     <th className="py-3 px-4 font-medium">Customer &amp; Vehicle</th>
                     <th className="py-3 px-4 font-medium">Policy Coverage</th>
@@ -342,10 +342,10 @@ export default function Home() {
                     <th className="py-3 px-4 text-right font-medium">Review</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/50">
+                <tbody className="divide-y divide-integral-midnight-500/10">
                   {filteredClaims.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-slate-500 text-xs">
+                      <td colSpan={6} className="py-12 text-center text-integral-midnight-400 text-xs">
                         No claims match the active filter or query.
                       </td>
                     </tr>
@@ -360,15 +360,15 @@ export default function Home() {
                           onClick={() => setSelectedClaimId(claim.claim_id)}
                           className={`cursor-pointer transition ${
                             isSelected 
-                              ? 'bg-sky-950/40' 
-                              : 'hover:bg-slate-850/50'
+                              ? 'bg-integral-midnight-700/60' 
+                              : 'hover:bg-integral-midnight-700/30'
                           }`}
                         >
                           {/* 1. Claim & Channel */}
                           <td className="py-3.5 px-4">
-                            <div className="font-mono font-semibold text-sky-400">{claim.claim_id}</div>
-                            <div className="text-[11px] text-slate-400 flex items-center space-x-1.5 mt-0.5">
-                              {claim.channel === 'voice' && <Phone className="w-3 h-3 text-indigo-400" />}
+                            <div className="font-mono font-semibold text-integral-copper-400">{claim.claim_id}</div>
+                            <div className="text-[11px] text-integral-midnight-300 flex items-center space-x-1.5 mt-0.5">
+                              {claim.channel === 'voice' && <Phone className="w-3 h-3 text-integral-copper-400" />}
                               {claim.channel === 'email' && <Mail className="w-3 h-3 text-sky-400" />}
                               {claim.channel === 'whatsapp' && <MessageSquare className="w-3 h-3 text-emerald-400" />}
                               <span className="capitalize">{claim.channel}</span>
@@ -379,10 +379,10 @@ export default function Home() {
 
                           {/* 2. Customer & Vehicle */}
                           <td className="py-3.5 px-4">
-                            <div className="font-medium text-slate-200">
+                            <div className="font-medium text-white">
                               {claim.holder_name || claim.reported_name || 'Unassigned'}
                             </div>
-                            <div className="text-[11px] text-slate-400 flex items-center space-x-1.5 mt-0.5">
+                            <div className="text-[11px] text-integral-midnight-300 flex items-center space-x-1.5 mt-0.5">
                               <span className="font-mono text-amber-300 font-medium">{claim.reported_plate || 'No Plate'}</span>
                               {claim.vehicle && <span>· {claim.vehicle}</span>}
                             </div>
@@ -397,7 +397,7 @@ export default function Home() {
                             }`}>
                               {claim.policy_coverage || 'Unlinked'}
                             </span>
-                            <div className="text-[11px] text-slate-400 mt-0.5">
+                            <div className="text-[11px] text-integral-midnight-300 mt-0.5">
                               Ded: €{claim.deductible_teilkasko_eur ?? 150}
                             </div>
                           </td>
@@ -426,12 +426,12 @@ export default function Home() {
                                 </span>
                               )}
                               {claim.is_duplicate && (
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-integral-copper-500/10 text-integral-copper-400 border border-integral-copper-500/20">
                                   Duplicate
                                 </span>
                               )}
                               {!claim.has_glass && claim.is_storm_claim && claim.policy_coverage !== 'Haftpflicht' && !claim.is_duplicate && (
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400">
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-integral-midnight-700/60 text-integral-midnight-300">
                                   Dents Only
                                 </span>
                               )}
@@ -457,14 +457,14 @@ export default function Home() {
                                 </span>
                               )}
                             </div>
-                            <div className="text-[11px] text-slate-400 mt-1 truncate max-w-xs">
+                            <div className="text-[11px] text-integral-midnight-300 mt-1 truncate max-w-xs">
                               {assessment?.primaryAction}
                             </div>
                           </td>
 
                           {/* 6. Action */}
                           <td className="py-3.5 px-4 text-right">
-                            <span className="text-xs text-sky-400 hover:text-sky-300 font-medium inline-flex items-center space-x-0.5">
+                            <span className="text-xs text-integral-copper-400 hover:text-integral-copper-300 font-medium inline-flex items-center space-x-0.5">
                               <span>Inspect</span>
                               <ChevronRight className="w-3.5 h-3.5" />
                             </span>
