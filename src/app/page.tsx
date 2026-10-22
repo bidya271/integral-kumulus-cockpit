@@ -272,7 +272,7 @@ export default function Home() {
   const isFilterActive = filterCategory !== 'all' || filterChannel !== 'all' || filterCoverage !== 'all' || searchQuery.trim().length > 0;
 
   return (
-    <div className="min-h-screen bg-integral-midnight-900 text-integral-midnight-100 flex flex-col font-sans selection:bg-integral-copper-600 selection:text-white">
+    <div className="min-h-screen bg-[#f7f7f8] text-gray-900 flex flex-col font-sans selection:bg-integral-copper-600 selection:text-white">
       
       {/* Top Header */}
       <Header
@@ -319,19 +319,19 @@ export default function Home() {
         <div className="space-y-3.5">
           
           {/* Operations Multi-Dimension Filter Bar */}
-          <div className="bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl p-3.5 space-y-3 shadow-xs">
+          <div className="bg-white border border-gray-200/80 rounded-xl p-3.5 space-y-3 shadow-xs">
             
             {/* Top row: Search input + Triage Category tabs */}
             <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
               
               {/* Segmented Category Filter */}
-              <div className="flex items-center space-x-1.5 p-1 bg-integral-midnight-950/60 border border-integral-midnight-500/20 rounded-xl text-xs overflow-x-auto">
+              <div className="flex items-center space-x-1.5 p-1 bg-gray-100/80 border border-gray-200/80 rounded-xl text-xs overflow-x-auto">
                 <button
                   onClick={() => setFilterCategory('all')}
                   className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap ${
                     filterCategory === 'all'
                       ? 'bg-integral-copper-600 text-white shadow-xs'
-                      : 'text-integral-midnight-300 hover:text-white'
+                      : 'text-gray-600 hover:text-gray-950'
                   }`}
                 >
                   All (270)
@@ -340,52 +340,52 @@ export default function Home() {
                   onClick={() => setFilterCategory('urgent')}
                   className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
                     filterCategory === 'urgent'
-                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                      : 'text-integral-midnight-300 hover:text-amber-400'
+                      ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                      : 'text-gray-600 hover:text-amber-800'
                   }`}
                 >
-                  <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
                   <span>Urgent Deadlines (2)</span>
                 </button>
                 <button
                   onClick={() => setFilterCategory('human')}
                   className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
                     filterCategory === 'human'
-                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                      : 'text-integral-midnight-300 hover:text-rose-400'
+                      ? 'bg-rose-100 text-rose-900 border border-rose-300'
+                      : 'text-gray-600 hover:text-rose-800'
                   }`}
                 >
-                  <UserCheck className="w-3.5 h-3.5 text-rose-400" />
+                  <UserCheck className="w-3.5 h-3.5 text-rose-600" />
                   <span>Human Review / Risk (35)</span>
                 </button>
                 <button
                   onClick={() => setFilterCategory('autonomous')}
                   className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
                     filterCategory === 'autonomous'
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                      : 'text-integral-midnight-300 hover:text-emerald-400'
+                      ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                      : 'text-gray-600 hover:text-emerald-800'
                   }`}
                 >
-                  <Bot className="w-3.5 h-3.5 text-emerald-400" />
+                  <Bot className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Autonomous Dispatches (156)</span>
                 </button>
                 <button
                   onClick={() => setFilterCategory('duplicates')}
                   className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
                     filterCategory === 'duplicates'
-                      ? 'bg-integral-copper-500/20 text-integral-copper-300 border border-integral-copper-500/30'
-                      : 'text-integral-midnight-300 hover:text-integral-copper-400'
+                      ? 'bg-orange-100 text-integral-copper-800 border border-orange-300'
+                      : 'text-gray-600 hover:text-integral-copper-700'
                   }`}
                 >
-                  <Merge className="w-3.5 h-3.5 text-integral-copper-400" />
+                  <Merge className="w-3.5 h-3.5 text-integral-copper-600" />
                   <span>Duplicates (21)</span>
                 </button>
                 <button
                   onClick={() => setFilterCategory('pre_storm')}
                   className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap ${
                     filterCategory === 'pre_storm'
-                      ? 'bg-integral-midnight-700 text-white shadow-xs'
-                      : 'text-integral-midnight-300 hover:text-white'
+                      ? 'bg-gray-800 text-white shadow-xs'
+                      : 'text-gray-600 hover:text-gray-950'
                   }`}
                 >
                   Pre-Storm (60)
@@ -394,35 +394,35 @@ export default function Home() {
 
               {/* Search Input */}
               <div className="relative min-w-[280px]">
-                <Search className="w-4 h-4 text-integral-midnight-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   placeholder="Filter by plate, name, claim ID..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-integral-midnight-950/80 border border-integral-midnight-500/20 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-integral-midnight-400 focus:outline-none focus:border-integral-copper-500 transition"
+                  className="w-full bg-gray-50/80 border border-gray-200 rounded-xl pl-9 pr-3 py-1.5 text-xs text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-integral-copper-500 transition"
                 />
               </div>
 
             </div>
 
             {/* Bottom row: Secondary Filters (Channel + Coverage) & Active Status */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-integral-midnight-500/10 text-xs text-integral-midnight-300">
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-gray-100 text-xs text-gray-600">
               
               <div className="flex flex-wrap items-center gap-4">
                 
                 {/* Channel Filter Pills */}
                 <div className="flex items-center space-x-1.5">
-                  <span className="text-[11px] text-integral-midnight-400 uppercase font-mono tracking-wider">Channel:</span>
-                  <div className="flex items-center space-x-1 bg-integral-midnight-950/50 p-0.5 rounded-lg border border-integral-midnight-500/20">
+                  <span className="text-[11px] text-gray-400 uppercase font-mono tracking-wider">Channel:</span>
+                  <div className="flex items-center space-x-1 bg-gray-100/80 p-0.5 rounded-lg border border-gray-200/60">
                     {(['all', 'app', 'email', 'voice', 'whatsapp', 'service_desk'] as const).map((ch) => (
                       <button
                         key={ch}
                         onClick={() => setFilterChannel(ch)}
                         className={`px-2 py-0.5 rounded text-[11px] font-medium transition ${
                           filterChannel === ch
-                            ? 'bg-integral-midnight-700 text-white shadow-xs'
-                            : 'text-integral-midnight-400 hover:text-integral-midnight-200'
+                            ? 'bg-white text-gray-950 shadow-2xs font-semibold'
+                            : 'text-gray-500 hover:text-gray-900'
                         }`}
                       >
                         {ch === 'all' ? 'All' : ch === 'service_desk' ? 'Desk' : ch.charAt(0).toUpperCase() + ch.slice(1)}
@@ -433,16 +433,16 @@ export default function Home() {
 
                 {/* Coverage Filter Pills */}
                 <div className="flex items-center space-x-1.5">
-                  <span className="text-[11px] text-integral-midnight-400 uppercase font-mono tracking-wider">Coverage:</span>
-                  <div className="flex items-center space-x-1 bg-integral-midnight-950/50 p-0.5 rounded-lg border border-integral-midnight-500/20">
+                  <span className="text-[11px] text-gray-400 uppercase font-mono tracking-wider">Coverage:</span>
+                  <div className="flex items-center space-x-1 bg-gray-100/80 p-0.5 rounded-lg border border-gray-200/60">
                     {(['all', 'Vollkasko', 'Teilkasko', 'Haftpflicht'] as const).map((cov) => (
                       <button
                         key={cov}
                         onClick={() => setFilterCoverage(cov)}
                         className={`px-2 py-0.5 rounded text-[11px] font-medium transition ${
                           filterCoverage === cov
-                            ? 'bg-integral-midnight-700 text-white shadow-xs'
-                            : 'text-integral-midnight-400 hover:text-integral-midnight-200'
+                            ? 'bg-white text-gray-950 shadow-2xs font-semibold'
+                            : 'text-gray-500 hover:text-gray-900'
                         }`}
                       >
                         {cov === 'all' ? 'All' : cov}
@@ -455,13 +455,13 @@ export default function Home() {
 
               {/* Status & Reset */}
               <div className="flex items-center space-x-3 text-[11px]">
-                <span className="text-integral-midnight-300 font-mono">
-                  Showing <strong className="text-white">{filteredClaims.length}</strong> of 270 claims
+                <span className="text-gray-500 font-mono">
+                  Showing <strong className="text-gray-950">{filteredClaims.length}</strong> of 270 claims
                 </span>
                 {isFilterActive && (
                   <button
                     onClick={resetFilters}
-                    className="flex items-center space-x-1 text-integral-copper-400 hover:text-integral-copper-300 underline font-medium"
+                    className="flex items-center space-x-1 text-integral-copper-600 hover:text-integral-copper-700 underline font-medium"
                   >
                     <RotateCcw className="w-3 h-3" />
                     <span>Reset</span>
@@ -474,11 +474,11 @@ export default function Home() {
           </div>
 
           {/* Clean Claims Ledger Table */}
-          <div className="bg-integral-midnight-800/60 border border-integral-midnight-500/20 rounded-xl overflow-hidden shadow-xs">
+          <div className="bg-white border border-gray-200/80 rounded-xl overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="border-b border-integral-midnight-500/20 bg-integral-midnight-950/60 text-integral-midnight-300 font-mono uppercase tracking-wider text-[11px]">
+                  <tr className="border-b border-gray-200/80 bg-gray-50/80 text-gray-500 font-mono uppercase tracking-wider text-[11px]">
                     <th className="py-3 px-4 font-medium">Claim &amp; Channel</th>
                     <th className="py-3 px-4 font-medium">Customer &amp; Vehicle</th>
                     <th className="py-3 px-4 font-medium">Policy Coverage</th>
@@ -487,10 +487,10 @@ export default function Home() {
                     <th className="py-3 px-4 text-right font-medium">Review</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-integral-midnight-500/10">
+                <tbody className="divide-y divide-gray-100">
                   {filteredClaims.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-integral-midnight-400 text-xs">
+                      <td colSpan={6} className="py-12 text-center text-gray-400 text-xs">
                         No claims match the active filter or query.
                       </td>
                     </tr>
@@ -505,17 +505,17 @@ export default function Home() {
                           onClick={() => setSelectedClaimId(claim.claim_id)}
                           className={`cursor-pointer transition ${
                             isSelected 
-                              ? 'bg-integral-midnight-700/60' 
-                              : 'hover:bg-integral-midnight-700/30'
+                              ? 'bg-orange-50/50' 
+                              : 'hover:bg-gray-50/80'
                           }`}
                         >
                           {/* 1. Claim & Channel */}
                           <td className="py-3.5 px-4">
-                            <div className="font-mono font-semibold text-integral-copper-400">{claim.claim_id}</div>
-                            <div className="text-[11px] text-integral-midnight-300 flex items-center space-x-1.5 mt-0.5">
-                              {claim.channel === 'voice' && <Phone className="w-3 h-3 text-integral-copper-400" />}
-                              {claim.channel === 'email' && <Mail className="w-3 h-3 text-sky-400" />}
-                              {claim.channel === 'whatsapp' && <MessageSquare className="w-3 h-3 text-emerald-400" />}
+                            <div className="font-mono font-semibold text-integral-copper-600">{claim.claim_id}</div>
+                            <div className="text-[11px] text-gray-500 flex items-center space-x-1.5 mt-0.5">
+                              {claim.channel === 'voice' && <Phone className="w-3 h-3 text-integral-copper-600" />}
+                              {claim.channel === 'email' && <Mail className="w-3 h-3 text-sky-600" />}
+                              {claim.channel === 'whatsapp' && <MessageSquare className="w-3 h-3 text-emerald-600" />}
                               <span className="capitalize">{claim.channel}</span>
                               <span>·</span>
                               <span>{claim.opened_at.split(' ')[1]}</span>
@@ -524,25 +524,25 @@ export default function Home() {
 
                           {/* 2. Customer & Vehicle */}
                           <td className="py-3.5 px-4">
-                            <div className="font-medium text-white">
+                            <div className="font-semibold text-gray-950">
                               {claim.holder_name || claim.reported_name || 'Unassigned'}
                             </div>
-                            <div className="text-[11px] text-integral-midnight-300 flex items-center space-x-1.5 mt-0.5">
-                              <span className="font-mono text-amber-300 font-medium">{claim.reported_plate || 'No Plate'}</span>
+                            <div className="text-[11px] text-gray-500 flex items-center space-x-1.5 mt-0.5">
+                              <span className="font-mono text-gray-800 font-semibold bg-gray-100 px-1 py-0.5 rounded border border-gray-200">{claim.reported_plate || 'No Plate'}</span>
                               {claim.vehicle && <span>· {claim.vehicle}</span>}
                             </div>
                           </td>
 
                           {/* 3. Coverage */}
                           <td className="py-3.5 px-4">
-                            <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium ${
-                              claim.policy_coverage === 'Vollkasko' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' :
-                              claim.policy_coverage === 'Teilkasko' ? 'bg-sky-500/10 text-sky-300 border border-sky-500/20' :
-                              'bg-rose-500/10 text-rose-300 border border-rose-500/20'
+                            <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-semibold ${
+                              claim.policy_coverage === 'Vollkasko' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
+                              claim.policy_coverage === 'Teilkasko' ? 'bg-sky-50 text-sky-800 border border-sky-200' :
+                              'bg-rose-50 text-rose-800 border border-rose-200'
                             }`}>
                               {claim.policy_coverage || 'Unlinked'}
                             </span>
-                            <div className="text-[11px] text-integral-midnight-300 mt-0.5">
+                            <div className="text-[11px] text-gray-500 mt-0.5 font-medium">
                               Ded: €{claim.deductible_teilkasko_eur ?? 150}
                             </div>
                           </td>
@@ -551,32 +551,32 @@ export default function Home() {
                           <td className="py-3.5 px-4">
                             <div className="flex flex-wrap gap-1 max-w-xs">
                               {claim.claim_id === 'KS-26-104234' && (
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
                                   12:00 Deadline
                                 </span>
                               )}
                               {claim.claim_id === 'KS-26-104413' && (
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
                                   Mobility &gt;14d
                                 </span>
                               )}
                               {claim.is_storm_claim && claim.policy_coverage === 'Haftpflicht' && (
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-500/20 text-red-300 border border-red-500/30">
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">
                                   Liability Only
                                 </span>
                               )}
                               {claim.has_glass && (
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-rose-50 text-rose-700 border border-rose-200">
                                   Broken Glass
                                 </span>
                               )}
                               {claim.is_duplicate && (
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-integral-copper-500/10 text-integral-copper-400 border border-integral-copper-500/20">
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-50 text-integral-copper-700 border border-orange-200">
                                   Duplicate
                                 </span>
                               )}
                               {!claim.has_glass && claim.is_storm_claim && claim.policy_coverage !== 'Haftpflicht' && !claim.is_duplicate && (
-                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-integral-midnight-700/60 text-integral-midnight-300">
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
                                   Dents Only
                                 </span>
                               )}
@@ -587,29 +587,29 @@ export default function Home() {
                           <td className="py-3.5 px-4">
                             <div className="flex items-center space-x-1.5">
                               {assessment?.overallDecision === 'URGENT_DEADLINE' && (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
                                   Urgent Action
                                 </span>
                               )}
                               {assessment?.overallDecision === 'HUMAN_REVIEW_REQUIRED' && (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
                                   Human Review
                                 </span>
                               )}
                               {assessment?.overallDecision === 'AUTONOMOUS' && (
-                                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                                   Autonomous
                                 </span>
                               )}
                             </div>
-                            <div className="text-[11px] text-integral-midnight-300 mt-1 truncate max-w-xs">
+                            <div className="text-[11px] text-gray-600 mt-1 truncate max-w-xs font-medium">
                               {assessment?.primaryAction}
                             </div>
                           </td>
 
                           {/* 6. Action */}
                           <td className="py-3.5 px-4 text-right">
-                            <span className="text-xs text-integral-copper-400 hover:text-integral-copper-300 font-medium inline-flex items-center space-x-0.5">
+                            <span className="text-xs text-integral-copper-600 hover:text-integral-copper-700 font-semibold inline-flex items-center space-x-0.5">
                               <span>Inspect</span>
                               <ChevronRight className="w-3.5 h-3.5" />
                             </span>

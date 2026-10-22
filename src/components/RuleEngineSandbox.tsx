@@ -112,34 +112,34 @@ export const RuleEngineSandbox: React.FC<RuleEngineSandboxProps> = ({ isOpen, on
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden text-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="relative w-full max-w-4xl bg-white border border-gray-200 rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden text-gray-900">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/60">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50/80">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400">
+            <div className="p-2 bg-orange-50 border border-orange-200 rounded-lg text-integral-copper-600">
               <Sliders className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">Business Rule Engine Simulator</h2>
-              <p className="text-xs text-slate-400">Test how the 7 Claims Handbook rules evaluate edge cases in real-time</p>
+              <h2 className="text-lg font-bold text-gray-950">Business Rule Engine Simulator</h2>
+              <p className="text-xs text-gray-500">Test how the 7 Claims Handbook rules evaluate edge cases in real-time</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition">
+          <button onClick={onClose} className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-900/90 text-sm">
+        <div className="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-6 bg-white text-sm">
           
           {/* Controls */}
-          <div className="space-y-4 bg-slate-950/40 p-5 rounded-xl border border-slate-800">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Simulate Claim Parameters</h3>
+          <div className="space-y-4 bg-gray-50/80 p-5 rounded-xl border border-gray-200">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-600 mb-2">Simulate Claim Parameters</h3>
             
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Policy Coverage</label>
+              <label className="text-xs text-gray-500 block mb-1">Policy Coverage</label>
               <div className="grid grid-cols-3 gap-2">
                 {(['Haftpflicht', 'Teilkasko', 'Vollkasko'] as const).map(c => (
                   <button
@@ -147,8 +147,8 @@ export const RuleEngineSandbox: React.FC<RuleEngineSandboxProps> = ({ isOpen, on
                     onClick={() => setCoverage(c)}
                     className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition ${
                       coverage === c
-                        ? 'bg-sky-600 border-sky-400 text-white'
-                        : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                        ? 'bg-integral-copper-600 border-integral-copper-600 text-white shadow-xs font-semibold'
+                        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'
                     }`}
                   >
                     {c}
@@ -158,7 +158,7 @@ export const RuleEngineSandbox: React.FC<RuleEngineSandboxProps> = ({ isOpen, on
             </div>
 
             <div>
-              <label className="text-xs text-slate-400 block mb-1">Event Type</label>
+              <label className="text-xs text-gray-500 block mb-1">Event Type</label>
               <div className="grid grid-cols-3 gap-2">
                 {(['Hail', 'Collision', 'Vandalism'] as const).map(e => (
                   <button
@@ -166,8 +166,8 @@ export const RuleEngineSandbox: React.FC<RuleEngineSandboxProps> = ({ isOpen, on
                     onClick={() => setEventType(e)}
                     className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition ${
                       eventType === e
-                        ? 'bg-sky-600 border-sky-400 text-white'
-                        : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                        ? 'bg-gray-900 border-gray-900 text-white shadow-xs font-semibold'
+                        : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100'
                     }`}
                   >
                     {e}
@@ -177,58 +177,58 @@ export const RuleEngineSandbox: React.FC<RuleEngineSandboxProps> = ({ isOpen, on
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
-              <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer p-2 bg-slate-900 rounded-lg border border-slate-800">
+              <label className="flex items-center space-x-2 text-xs text-gray-800 cursor-pointer p-2 bg-white rounded-lg border border-gray-200 shadow-2xs">
                 <input
                   type="checkbox"
                   checked={hasGlassDamage}
                   onChange={(e) => setHasGlassDamage(e.target.checked)}
-                  className="rounded text-sky-500 bg-slate-800 border-slate-700 focus:ring-0"
+                  className="rounded text-integral-copper-600 border-gray-300 focus:ring-0"
                 />
-                <span>Broken Glass (Rule 5)</span>
+                <span className="font-medium">Broken Glass (Rule 5)</span>
               </label>
 
-              <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer p-2 bg-slate-900 rounded-lg border border-slate-800">
+              <label className="flex items-center space-x-2 text-xs text-gray-800 cursor-pointer p-2 bg-white rounded-lg border border-gray-200 shadow-2xs">
                 <input
                   type="checkbox"
                   checked={isUndrivable}
                   onChange={(e) => setIsUndrivable(e.target.checked)}
-                  className="rounded text-sky-500 bg-slate-800 border-slate-700 focus:ring-0"
+                  className="rounded text-integral-copper-600 border-gray-300 focus:ring-0"
                 />
-                <span>Undrivable Vehicle</span>
+                <span className="font-medium">Undrivable Vehicle</span>
               </label>
             </div>
 
-            <div className="border-t border-slate-800 pt-3 space-y-3">
+            <div className="border-t border-gray-200 pt-3 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-slate-400 block mb-1">Workshop KVA (€ Net)</label>
+                  <label className="text-xs text-gray-500 block mb-1">Workshop KVA (€ Net)</label>
                   <input
                     type="number"
                     value={kvaNet}
                     onChange={(e) => setKvaNet(Number(e.target.value))}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                    className="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs text-gray-900 focus:outline-none focus:border-integral-copper-500 shadow-2xs"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400 block mb-1">Dekra Report (€ Net)</label>
+                  <label className="text-xs text-gray-500 block mb-1">Dekra Report (€ Net)</label>
                   <input
                     type="number"
                     value={dekraNet}
                     onChange={(e) => setDekraNet(Number(e.target.value))}
-                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white"
+                    className="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-xs text-gray-900 focus:outline-none focus:border-integral-copper-500 shadow-2xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Rental Car Days: {rentalDays} {rentalDays > 14 && <span className="text-rose-400 font-semibold">(&gt;14 days requires approval)</span>}</label>
+                <label className="text-xs text-gray-600 block mb-1">Rental Car Days: {rentalDays} {rentalDays > 14 && <span className="text-rose-700 font-semibold">(&gt;14 days requires approval)</span>}</label>
                 <input
                   type="range"
                   min="1"
                   max="28"
                   value={rentalDays}
                   onChange={(e) => setRentalDays(Number(e.target.value))}
-                  className="w-full accent-sky-500"
+                  className="w-full accent-integral-copper-600"
                 />
               </div>
             </div>
@@ -241,21 +241,21 @@ export const RuleEngineSandbox: React.FC<RuleEngineSandboxProps> = ({ isOpen, on
             {/* Outcome Badge */}
             <div className={`p-4 rounded-xl border flex items-center justify-between ${
               overallDecision === 'AUTONOMOUS'
-                ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-300'
-                : 'bg-rose-950/30 border-rose-500/40 text-rose-300'
+                ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
+                : 'bg-rose-50/70 border-rose-200 text-rose-900'
             }`}>
               <div className="flex items-center space-x-3">
                 {overallDecision === 'AUTONOMOUS' ? (
-                  <div className="p-2 bg-emerald-500/20 rounded-lg text-emerald-400">
+                  <div className="p-2 bg-emerald-100 rounded-lg text-emerald-800">
                     <Bot className="w-6 h-6" />
                   </div>
                 ) : (
-                  <div className="p-2 bg-rose-500/20 rounded-lg text-rose-400">
+                  <div className="p-2 bg-rose-100 rounded-lg text-rose-800">
                     <UserCheck className="w-6 h-6" />
                   </div>
                 )}
                 <div>
-                  <div className="text-xs font-mono uppercase tracking-wider opacity-75">Decision Mode</div>
+                  <div className="text-xs font-mono uppercase tracking-wider opacity-75 font-semibold">Decision Mode</div>
                   <div className="text-base font-bold">
                     {overallDecision === 'AUTONOMOUS' ? 'AUTONOMOUS (Zero-Touch / 1-Click)' : 'HUMAN REVIEW REQUIRED'}
                   </div>
@@ -264,22 +264,22 @@ export const RuleEngineSandbox: React.FC<RuleEngineSandboxProps> = ({ isOpen, on
             </div>
 
             {/* Recommended Action */}
-            <div className="p-3 bg-slate-950/60 border border-slate-800 rounded-xl">
-              <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block mb-1">Recommended Action</span>
-              <span className="text-sm font-semibold text-white">{primaryAction}</span>
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl">
+              <span className="text-xs font-mono uppercase tracking-wider text-gray-500 block mb-1">Recommended Action</span>
+              <span className="text-sm font-bold text-gray-950">{primaryAction}</span>
             </div>
 
             {/* Rule Trace */}
             <div className="space-y-2">
-              <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block">Handbook Rule Trace</span>
+              <span className="text-xs font-mono uppercase tracking-wider text-gray-500 block">Handbook Rule Trace</span>
               {rulesEvaluated.map((r, i) => (
-                <div key={i} className="p-2.5 bg-slate-950/40 border border-slate-800/80 rounded-lg flex items-start space-x-2 text-xs">
-                  {r.status === 'PASSED' && <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />}
-                  {r.status === 'TRIGGERED' && <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />}
-                  {r.status === 'FAILED' && <ShieldX className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />}
+                <div key={i} className="p-2.5 bg-gray-50 border border-gray-200 rounded-lg flex items-start space-x-2 text-xs">
+                  {r.status === 'PASSED' && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />}
+                  {r.status === 'TRIGGERED' && <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />}
+                  {r.status === 'FAILED' && <ShieldX className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />}
                   <div>
-                    <div className="font-semibold text-slate-200">{r.rule}</div>
-                    <div className="text-slate-400 mt-0.5">{r.explanation}</div>
+                    <div className="font-semibold text-gray-900">{r.rule}</div>
+                    <div className="text-gray-600 mt-0.5">{r.explanation}</div>
                   </div>
                 </div>
               ))}
@@ -287,8 +287,8 @@ export const RuleEngineSandbox: React.FC<RuleEngineSandboxProps> = ({ isOpen, on
 
             {/* Compliant Generated Draft */}
             <div>
-              <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block mb-1">Rule-Engine Generated Message</span>
-              <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl font-mono text-xs text-slate-300 whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
+              <span className="text-xs font-mono uppercase tracking-wider text-gray-500 block mb-1">Rule-Engine Generated Message</span>
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl font-mono text-xs text-gray-800 whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
                 {generatedDraft}
               </div>
             </div>
@@ -298,8 +298,8 @@ export const RuleEngineSandbox: React.FC<RuleEngineSandboxProps> = ({ isOpen, on
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-slate-800 bg-slate-950/60 flex justify-end text-xs text-slate-400">
-          <button onClick={onClose} className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-lg transition">
+        <div className="px-6 py-3 border-t border-gray-200 bg-gray-50/80 flex justify-end text-xs text-gray-500">
+          <button onClick={onClose} className="px-4 py-2 bg-gray-900 hover:bg-black text-white font-semibold rounded-lg shadow-xs transition">
             Close Simulator
           </button>
         </div>
