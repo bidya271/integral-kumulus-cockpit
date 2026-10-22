@@ -1,7 +1,10 @@
 'use client';
 
 import React from 'react';
-import { CheckCircle2, Zap, Clock, ShieldCheck, TrendingUp, AlertTriangle } from 'lucide-react';
+import { 
+  CheckCircle2, Zap, Clock, ShieldCheck, TrendingUp, 
+  AlertTriangle, DollarSign, Activity, Users, Truck 
+} from 'lucide-react';
 
 interface KPIMetricsBarProps {
   totalClaims: number;
@@ -9,6 +12,8 @@ interface KPIMetricsBarProps {
   hoursSaved: number;
   isAutohausApproved: boolean;
   isHaftpflichtQuarantined: boolean;
+  isGlassDispatched: boolean;
+  isDekraDispatched: boolean;
 }
 
 export const KPIMetricsBar: React.FC<KPIMetricsBarProps> = ({
@@ -16,96 +21,130 @@ export const KPIMetricsBar: React.FC<KPIMetricsBarProps> = ({
   handledCount,
   hoursSaved,
   isAutohausApproved,
-  isHaftpflichtQuarantined
+  isHaftpflichtQuarantined,
+  isGlassDispatched,
+  isDekraDispatched,
 }) => {
   const percentage = Math.round((handledCount / totalClaims) * 100);
+  // Calculate financial leakage prevented (33 claims * avg €4,000 hail damage estimate = €132,000)
+  const leakagePreventedEur = isHaftpflichtQuarantined ? 132000 : 0;
+  const partnerDispatchesCount = (isGlassDispatched ? 117 : 0) + (isDekraDispatched ? 39 : 0);
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
-      
-      {/* KPI 1: TRIAGE COMPLETION */}
-      <div className="bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl p-4 flex flex-col justify-between shadow-xs">
-        <div className="flex items-center justify-between text-xs text-integral-midnight-300">
-          <span className="font-medium">Queue Triage</span>
-          <span className="text-[11px] font-mono text-integral-midnight-400">Target: 100% by 12:00</span>
+    <div className="space-y-3">
+      {/* Metrics Section Title */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Activity className="w-4 h-4 text-integral-copper-400" />
+          <span className="text-xs font-bold uppercase tracking-wider text-integral-midnight-200">
+            Operations Command &amp; Capacity Ledger
+          </span>
         </div>
-        <div className="my-2.5 flex items-baseline justify-between">
-          <div className="text-2xl font-bold tracking-tight text-white font-mono">
-            {handledCount} <span className="text-sm font-normal text-integral-midnight-400">/ {totalClaims}</span>
-          </div>
-          <span className="text-xs font-semibold font-mono text-integral-copper-400">{percentage}%</span>
-        </div>
-        <div className="w-full bg-integral-midnight-950 h-1.5 rounded-full overflow-hidden">
-          <div 
-            className="bg-integral-copper-500 h-full rounded-full transition-all duration-500"
-            style={{ width: `${percentage}%` }}
-          />
+        <div className="text-[11px] text-integral-midnight-300 font-mono">
+          Queue Clearance Velocity: <span className="text-white font-semibold">85 claims/hr</span> · <span className="text-emerald-400">ETA 11:35 AM</span>
         </div>
       </div>
 
-      {/* KPI 2: HOURS SAVED */}
-      <div className="bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl p-4 flex flex-col justify-between shadow-xs">
-        <div className="flex items-center justify-between text-xs text-integral-midnight-300">
-          <span className="font-medium">Capacity Saved Today</span>
-          <Zap className="w-3.5 h-3.5 text-integral-copper-400" />
-        </div>
-        <div className="my-2.5">
-          <div className="text-2xl font-bold tracking-tight text-emerald-400 font-mono">
-            +{hoursSaved.toFixed(1)} <span className="text-sm font-normal text-integral-midnight-400">hrs</span>
-          </div>
-        </div>
-        <div className="text-[11px] text-integral-midnight-300 flex items-center space-x-1">
-          <TrendingUp className="w-3 h-3 text-emerald-400" />
-          <span>{(hoursSaved / 8).toFixed(1)} days of manual review freed</span>
-        </div>
-      </div>
-
-      {/* KPI 3: TICKING SLA COUNTDOWN */}
-      <div className="bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl p-4 flex flex-col justify-between shadow-xs">
-        <div className="flex items-center justify-between text-xs text-integral-midnight-300">
-          <span className="font-medium">Workshop Deadline</span>
-          <Clock className="w-3.5 h-3.5 text-amber-400" />
-        </div>
-        <div className="my-2.5">
-          <div className="text-2xl font-bold tracking-tight text-amber-400 font-mono">
-            {isAutohausApproved ? 'Approved' : '03h 54m'}
-          </div>
-        </div>
-        <div className="text-[11px] text-integral-midnight-300 flex items-center space-x-1">
-          {isAutohausApproved ? (
-            <span className="text-emerald-400 flex items-center space-x-1">
-              <CheckCircle2 className="w-3 h-3" />
-              <span>Autohaus Brandl slot locked</span>
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+        
+        {/* KPI 1: TRIAGE COMPLETION & VELOCITY */}
+        <div className="bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl p-4 flex flex-col justify-between shadow-xs">
+          <div className="flex items-center justify-between text-xs text-integral-midnight-300">
+            <span className="font-medium">Queue Clearance</span>
+            <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+              ETA 11:35
             </span>
-          ) : (
-            <span className="text-amber-400 flex items-center space-x-1">
-              <AlertTriangle className="w-3 h-3" />
-              <span>Expires at 12:00 PM for KS-26-104234</span>
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* KPI 4: COMPLIANCE RISKS BLOCKED */}
-      <div className="bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl p-4 flex flex-col justify-between shadow-xs">
-        <div className="flex items-center justify-between text-xs text-integral-midnight-300">
-          <span className="font-medium">Legal Hazards Blocked</span>
-          <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
-        </div>
-        <div className="my-2.5">
-          <div className="text-2xl font-bold tracking-tight text-white font-mono">
-            {isHaftpflichtQuarantined ? '33 / 33' : '33 At Risk'}
+          </div>
+          <div className="my-2 flex items-baseline justify-between">
+            <div className="text-2xl font-bold tracking-tight text-white font-mono">
+              {handledCount} <span className="text-xs font-normal text-integral-midnight-400">/ {totalClaims}</span>
+            </div>
+            <span className="text-xs font-semibold font-mono text-integral-copper-400">{percentage}%</span>
+          </div>
+          <div className="w-full bg-integral-midnight-950 h-1.5 rounded-full overflow-hidden">
+            <div 
+              className="bg-integral-copper-500 h-full rounded-full transition-all duration-500"
+              style={{ width: `${percentage}%` }}
+            />
           </div>
         </div>
-        <div className="text-[11px]">
-          {isHaftpflichtQuarantined ? (
-            <span className="text-emerald-400">Haftpflicht drafts halted safely</span>
-          ) : (
-            <span className="text-rose-400">Haftpflicht storm claims pending halt</span>
-          )}
-        </div>
-      </div>
 
+        {/* KPI 2: FINANCIAL LEAKAGE PREVENTED */}
+        <div className="bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl p-4 flex flex-col justify-between shadow-xs">
+          <div className="flex items-center justify-between text-xs text-integral-midnight-300">
+            <span className="font-medium">Leakage Prevented</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-integral-copper-400" />
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-bold tracking-tight text-emerald-400 font-mono">
+              €{(leakagePreventedEur / 1000).toFixed(0)}k <span className="text-xs font-normal text-integral-midnight-400">saved</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-integral-midnight-300">
+            {isHaftpflichtQuarantined ? (
+              <span className="text-emerald-400 font-medium">33 liability payouts blocked</span>
+            ) : (
+              <span className="text-rose-400 font-medium">33 uncovered claims pending halt</span>
+            )}
+          </div>
+        </div>
+
+        {/* KPI 3: PARTNER NETWORK FULFILLMENT */}
+        <div className="bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl p-4 flex flex-col justify-between shadow-xs">
+          <div className="flex items-center justify-between text-xs text-integral-midnight-300">
+            <span className="font-medium">Partner Dispatches</span>
+            <Truck className="w-3.5 h-3.5 text-sky-400" />
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-bold tracking-tight text-white font-mono">
+              {partnerDispatchesCount} <span className="text-xs font-normal text-integral-midnight-400">/ 156 slots</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-integral-midnight-300 flex items-center space-x-1">
+            <span>Klarsicht (117)</span>
+            <span>·</span>
+            <span>Dekra (39)</span>
+          </div>
+        </div>
+
+        {/* KPI 4: CAPACITY SAVED */}
+        <div className="bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl p-4 flex flex-col justify-between shadow-xs">
+          <div className="flex items-center justify-between text-xs text-integral-midnight-300">
+            <span className="font-medium">FTE Capacity Freed</span>
+            <Zap className="w-3.5 h-3.5 text-integral-copper-400" />
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-bold tracking-tight text-integral-copper-400 font-mono">
+              +{hoursSaved.toFixed(1)} <span className="text-xs font-normal text-integral-midnight-400">hrs</span>
+            </div>
+          </div>
+          <div className="text-[11px] text-integral-midnight-300 flex items-center space-x-1">
+            <TrendingUp className="w-3 h-3 text-emerald-400" />
+            <span>{(hoursSaved / 8).toFixed(1)} handler workdays recovered</span>
+          </div>
+        </div>
+
+        {/* KPI 5: WORKSHOP SLA DEADLINE */}
+        <div className="bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl p-4 flex flex-col justify-between shadow-xs col-span-2 lg:col-span-1">
+          <div className="flex items-center justify-between text-xs text-integral-midnight-300">
+            <span className="font-medium">Critical SLA Clock</span>
+            <Clock className="w-3.5 h-3.5 text-amber-400" />
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-bold tracking-tight text-amber-400 font-mono">
+              {isAutohausApproved ? 'Approved' : '03h 54m'}
+            </div>
+          </div>
+          <div className="text-[11px] text-integral-midnight-300">
+            {isAutohausApproved ? (
+              <span className="text-emerald-400 font-medium">Autohaus slot locked today 13:00</span>
+            ) : (
+              <span className="text-amber-400 font-medium">Expires 12:00 for KS-26-104234</span>
+            )}
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 };

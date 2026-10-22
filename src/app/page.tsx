@@ -7,12 +7,12 @@ import { Header } from '../components/Header';
 import { KPIMetricsBar } from '../components/KPIMetricsBar';
 import { AttentionCenter } from '../components/AttentionCenter';
 import { ClaimDetailDrawer } from '../components/ClaimDetailDrawer';
-import { ExecutiveMemoModal } from '../components/ExecutiveMemoModal';
 import { WorkLogModal } from '../components/WorkLogModal';
 import { RuleEngineSandbox } from '../components/RuleEngineSandbox';
 import { 
   Search, AlertTriangle, AlertCircle, Bot, UserCheck, Merge, 
-  ChevronRight, Filter, Car, Phone, Mail, MessageSquare
+  ChevronRight, Filter, Car, Phone, Mail, MessageSquare,
+  Shield, CheckCircle2, RotateCcw, Download, Sparkles, Layers
 } from 'lucide-react';
 
 export default function Home() {
@@ -27,7 +27,6 @@ export default function Home() {
 
   // Modals state
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
-  const [isMemoOpen, setIsMemoOpen] = useState(false);
   const [isWorkLogOpen, setIsWorkLogOpen] = useState(false);
   const [isSandboxOpen, setIsSandboxOpen] = useState(false);
 
@@ -39,9 +38,11 @@ export default function Home() {
   const [isGlassDispatched, setIsGlassDispatched] = useState(false);
   const [isDekraDispatched, setIsDekraDispatched] = useState(false);
 
-  // Search & Filter state
+  // Operations Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState<'all' | 'urgent' | 'human' | 'autonomous' | 'duplicates' | 'pre_storm'>('all');
+  const [filterChannel, setFilterChannel] = useState<'all' | 'app' | 'email' | 'voice' | 'whatsapp' | 'service_desk'>('all');
+  const [filterCoverage, setFilterCoverage] = useState<'all' | 'Vollkasko' | 'Teilkasko' | 'Haftpflicht'>('all');
 
   // Policy map
   const policyMap = useMemo(() => {
@@ -90,6 +91,7 @@ export default function Home() {
   // Filtered claims list
   const filteredClaims = useMemo(() => {
     return claims.filter((c) => {
+      // 1. Search Query
       const query = searchQuery.toLowerCase().trim();
       if (query) {
         const matchesQuery = 
@@ -101,8 +103,18 @@ export default function Home() {
         if (!matchesQuery) return false;
       }
 
-      const assessment = assessments.get(c.claim_id);
+      // 2. Channel Filter
+      if (filterChannel !== 'all' && c.channel !== filterChannel) {
+        return false;
+      }
 
+      // 3. Coverage Filter
+      if (filterCoverage !== 'all' && c.policy_coverage !== filterCoverage) {
+        return false;
+      }
+
+      // 4. Category Filter
+      const assessment = assessments.get(c.claim_id);
       if (filterCategory === 'urgent') {
         return assessment?.overallDecision === 'URGENT_DEADLINE' || c.claim_id === 'KS-26-104234' || c.claim_id === 'KS-26-104413';
       }
@@ -121,7 +133,7 @@ export default function Home() {
 
       return true;
     });
-  }, [claims, searchQuery, filterCategory, assessments]);
+  }, [claims, searchQuery, filterCategory, filterChannel, filterCoverage, assessments]);
 
   // Selected claim details
   const selectedClaim = useMemo(() => {
@@ -198,14 +210,75 @@ export default function Home() {
     setClaims(prev => prev.map(c => c.claim_id === claimId ? { ...c, status: 'in_review' } : c));
   };
 
+  const handleExportOpsReport = () => {
+    const headers = [
+      'Claim ID',
+      'Policy ID',
+      'Policy Holder',
+      'License Plate',
+      'Vehicle Model',
+      'Coverage Type',
+      'Deductible EUR',
+      'Ingestion Channel',
+      'Reported Time',
+      'Is Storm Claim',
+      'Has Glass Damage',
+      'Repair Estimate EUR',
+      'Is Duplicate',
+      'Rule Engine Decision',
+      'Primary Action',
+      'Operational Flags'
+    ];
+
+    const rows = filteredClaims.map(c => {
+      const assessment = assessments.get(c.claim_id);
+      return [
+        c.claim_id,
+        c.resolved_policy_id || 'UNLINKED',
+        `"${(c.holder_name || c.reported_name || 'Unknown').replace(/"/g, '""')}"`,
+        c.reported_plate || '',
+        `"${(c.vehicle || '').replace(/"/g, '""')}"`,
+        c.policy_coverage || 'Unlinked',
+        c.deductible_teilkasko_eur ?? 150,
+        c.channel,
+        c.opened_at,
+        c.is_storm_claim ? 'YES' : 'NO',
+        c.has_glass ? 'YES' : 'NO',
+        c.claim_id === 'KS-26-104234' ? 3860 : (c.policy_coverage === 'Haftpflicht' && c.is_storm_claim ? 4000 : 0),
+        c.is_duplicate ? 'YES' : 'NO',
+        assessment?.overallDecision || 'PENDING',
+        `"${(assessment?.primaryAction || '').replace(/"/g, '""')}"`,
+        `"${(assessment?.evaluations || []).map(e => e.ruleCode).join('; ')}"`
+      ].join(',');
+    });
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `integral_kumulus_ops_report_14jul2026.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const resetFilters = () => {
+    setFilterCategory('all');
+    setFilterChannel('all');
+    setFilterCoverage('all');
+    setSearchQuery('');
+  };
+
+  const isFilterActive = filterCategory !== 'all' || filterChannel !== 'all' || filterCoverage !== 'all' || searchQuery.trim().length > 0;
+
   return (
     <div className="min-h-screen bg-integral-midnight-900 text-integral-midnight-100 flex flex-col font-sans selection:bg-integral-copper-600 selection:text-white">
       
       {/* Top Header */}
       <Header
-        onOpenMemo={() => setIsMemoOpen(true)}
         onOpenWorkLog={() => setIsWorkLogOpen(true)}
         onOpenSandbox={() => setIsSandboxOpen(true)}
+        onExportOpsReport={handleExportOpsReport}
         totalClaims={claims.length}
         handledCount={stats.handledCount}
         hoursSaved={stats.hoursSaved}
@@ -221,6 +294,8 @@ export default function Home() {
           hoursSaved={stats.hoursSaved}
           isAutohausApproved={isAutohausApproved}
           isHaftpflichtQuarantined={isHaftpflichtQuarantined}
+          isGlassDispatched={isGlassDispatched}
+          isDekraDispatched={isDekraDispatched}
         />
 
         {/* Attention & Action Queue */}
@@ -243,87 +318,157 @@ export default function Home() {
         {/* Claims Ledger Section */}
         <div className="space-y-3.5">
           
-          {/* Controls Bar */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          {/* Operations Multi-Dimension Filter Bar */}
+          <div className="bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl p-3.5 space-y-3 shadow-xs">
             
-            {/* Segmented Category Filter */}
-            <div className="flex items-center space-x-1.5 p-1 bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl text-xs overflow-x-auto">
-              <button
-                onClick={() => setFilterCategory('all')}
-                className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap ${
-                  filterCategory === 'all'
-                    ? 'bg-integral-copper-600 text-white shadow-xs'
-                    : 'text-integral-midnight-300 hover:text-white'
-                }`}
-              >
-                All (270)
-              </button>
-              <button
-                onClick={() => setFilterCategory('urgent')}
-                className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
-                  filterCategory === 'urgent'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                    : 'text-integral-midnight-300 hover:text-amber-400'
-                }`}
-              >
-                <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
-                <span>Urgent (2)</span>
-              </button>
-              <button
-                onClick={() => setFilterCategory('human')}
-                className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
-                  filterCategory === 'human'
-                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                    : 'text-integral-midnight-300 hover:text-rose-400'
-                }`}
-              >
-                <UserCheck className="w-3.5 h-3.5 text-rose-400" />
-                <span>Human Review (35)</span>
-              </button>
-              <button
-                onClick={() => setFilterCategory('autonomous')}
-                className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
-                  filterCategory === 'autonomous'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                    : 'text-integral-midnight-300 hover:text-emerald-400'
-                }`}
-              >
-                <Bot className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Autonomous Ready (156)</span>
-              </button>
-              <button
-                onClick={() => setFilterCategory('duplicates')}
-                className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
-                  filterCategory === 'duplicates'
-                    ? 'bg-integral-copper-500/20 text-integral-copper-300 border border-integral-copper-500/30'
-                    : 'text-integral-midnight-300 hover:text-integral-copper-400'
-                }`}
-              >
-                <Merge className="w-3.5 h-3.5 text-integral-copper-400" />
-                <span>Duplicates (21)</span>
-              </button>
-              <button
-                onClick={() => setFilterCategory('pre_storm')}
-                className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap ${
-                  filterCategory === 'pre_storm'
-                    ? 'bg-integral-midnight-700 text-white shadow-xs'
-                    : 'text-integral-midnight-300 hover:text-white'
-                }`}
-              >
-                Pre-Storm (60)
-              </button>
+            {/* Top row: Search input + Triage Category tabs */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+              
+              {/* Segmented Category Filter */}
+              <div className="flex items-center space-x-1.5 p-1 bg-integral-midnight-950/60 border border-integral-midnight-500/20 rounded-xl text-xs overflow-x-auto">
+                <button
+                  onClick={() => setFilterCategory('all')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap ${
+                    filterCategory === 'all'
+                      ? 'bg-integral-copper-600 text-white shadow-xs'
+                      : 'text-integral-midnight-300 hover:text-white'
+                  }`}
+                >
+                  All (270)
+                </button>
+                <button
+                  onClick={() => setFilterCategory('urgent')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
+                    filterCategory === 'urgent'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                      : 'text-integral-midnight-300 hover:text-amber-400'
+                  }`}
+                >
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Urgent Deadlines (2)</span>
+                </button>
+                <button
+                  onClick={() => setFilterCategory('human')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
+                    filterCategory === 'human'
+                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                      : 'text-integral-midnight-300 hover:text-rose-400'
+                  }`}
+                >
+                  <UserCheck className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Human Review / Risk (35)</span>
+                </button>
+                <button
+                  onClick={() => setFilterCategory('autonomous')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
+                    filterCategory === 'autonomous'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      : 'text-integral-midnight-300 hover:text-emerald-400'
+                  }`}
+                >
+                  <Bot className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Autonomous Dispatches (156)</span>
+                </button>
+                <button
+                  onClick={() => setFilterCategory('duplicates')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
+                    filterCategory === 'duplicates'
+                      ? 'bg-integral-copper-500/20 text-integral-copper-300 border border-integral-copper-500/30'
+                      : 'text-integral-midnight-300 hover:text-integral-copper-400'
+                  }`}
+                >
+                  <Merge className="w-3.5 h-3.5 text-integral-copper-400" />
+                  <span>Duplicates (21)</span>
+                </button>
+                <button
+                  onClick={() => setFilterCategory('pre_storm')}
+                  className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap ${
+                    filterCategory === 'pre_storm'
+                      ? 'bg-integral-midnight-700 text-white shadow-xs'
+                      : 'text-integral-midnight-300 hover:text-white'
+                  }`}
+                >
+                  Pre-Storm (60)
+                </button>
+              </div>
+
+              {/* Search Input */}
+              <div className="relative min-w-[280px]">
+                <Search className="w-4 h-4 text-integral-midnight-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Filter by plate, name, claim ID..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-integral-midnight-950/80 border border-integral-midnight-500/20 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-integral-midnight-400 focus:outline-none focus:border-integral-copper-500 transition"
+                />
+              </div>
+
             </div>
 
-            {/* Search Input */}
-            <div className="relative min-w-[280px]">
-              <Search className="w-4 h-4 text-integral-midnight-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Filter by plate, name, claim ID..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-integral-midnight-800/80 border border-integral-midnight-500/20 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-integral-midnight-400 focus:outline-none focus:border-integral-copper-500 transition"
-              />
+            {/* Bottom row: Secondary Filters (Channel + Coverage) & Active Status */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-integral-midnight-500/10 text-xs text-integral-midnight-300">
+              
+              <div className="flex flex-wrap items-center gap-4">
+                
+                {/* Channel Filter Pills */}
+                <div className="flex items-center space-x-1.5">
+                  <span className="text-[11px] text-integral-midnight-400 uppercase font-mono tracking-wider">Channel:</span>
+                  <div className="flex items-center space-x-1 bg-integral-midnight-950/50 p-0.5 rounded-lg border border-integral-midnight-500/20">
+                    {(['all', 'app', 'email', 'voice', 'whatsapp', 'service_desk'] as const).map((ch) => (
+                      <button
+                        key={ch}
+                        onClick={() => setFilterChannel(ch)}
+                        className={`px-2 py-0.5 rounded text-[11px] font-medium transition ${
+                          filterChannel === ch
+                            ? 'bg-integral-midnight-700 text-white shadow-xs'
+                            : 'text-integral-midnight-400 hover:text-integral-midnight-200'
+                        }`}
+                      >
+                        {ch === 'all' ? 'All' : ch === 'service_desk' ? 'Desk' : ch.charAt(0).toUpperCase() + ch.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Coverage Filter Pills */}
+                <div className="flex items-center space-x-1.5">
+                  <span className="text-[11px] text-integral-midnight-400 uppercase font-mono tracking-wider">Coverage:</span>
+                  <div className="flex items-center space-x-1 bg-integral-midnight-950/50 p-0.5 rounded-lg border border-integral-midnight-500/20">
+                    {(['all', 'Vollkasko', 'Teilkasko', 'Haftpflicht'] as const).map((cov) => (
+                      <button
+                        key={cov}
+                        onClick={() => setFilterCoverage(cov)}
+                        className={`px-2 py-0.5 rounded text-[11px] font-medium transition ${
+                          filterCoverage === cov
+                            ? 'bg-integral-midnight-700 text-white shadow-xs'
+                            : 'text-integral-midnight-400 hover:text-integral-midnight-200'
+                        }`}
+                      >
+                        {cov === 'all' ? 'All' : cov}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Status & Reset */}
+              <div className="flex items-center space-x-3 text-[11px]">
+                <span className="text-integral-midnight-300 font-mono">
+                  Showing <strong className="text-white">{filteredClaims.length}</strong> of 270 claims
+                </span>
+                {isFilterActive && (
+                  <button
+                    onClick={resetFilters}
+                    className="flex items-center space-x-1 text-integral-copper-400 hover:text-integral-copper-300 underline font-medium"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Reset</span>
+                  </button>
+                )}
+              </div>
+
             </div>
 
           </div>
@@ -495,12 +640,6 @@ export default function Home() {
         aiDraft={selectedDraft}
         onClose={() => setSelectedClaimId(null)}
         onActionComplete={handleActionComplete}
-      />
-
-      {/* 1-Page Executive Memo Modal */}
-      <ExecutiveMemoModal
-        isOpen={isMemoOpen}
-        onClose={() => setIsMemoOpen(false)}
       />
 
       {/* Engineering Work Log Modal */}
