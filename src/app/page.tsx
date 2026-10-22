@@ -4,15 +4,15 @@ import React, { useState, useMemo } from 'react';
 import seedData from '../data/kumulus_seed.json';
 import { evaluateClaim, Claim, Policy, ClaimAssessment } from '../lib/ruleEngine';
 import { Header } from '../components/Header';
-import { EmergencyAlertBanner } from '../components/EmergencyAlertBanner';
-import { BatchActionToolbar } from '../components/BatchActionToolbar';
+import { KPIMetricsBar } from '../components/KPIMetricsBar';
+import { AttentionCenter } from '../components/AttentionCenter';
 import { ClaimDetailDrawer } from '../components/ClaimDetailDrawer';
 import { ExecutiveMemoModal } from '../components/ExecutiveMemoModal';
 import { WorkLogModal } from '../components/WorkLogModal';
 import { RuleEngineSandbox } from '../components/RuleEngineSandbox';
 import { 
-  Search, Filter, ShieldAlert, ShieldCheck, Clock, CheckCircle2, 
-  AlertTriangle, AlertCircle, ArrowRight, Bot, UserCheck, Merge, Sparkles, Send, RefreshCw
+  Search, AlertTriangle, AlertCircle, Bot, UserCheck, Merge, 
+  ChevronRight, Filter, Car, Phone, Mail, MessageSquare
 } from 'lucide-react';
 
 export default function Home() {
@@ -36,7 +36,6 @@ export default function Home() {
   const [isTomClarkeEscalated, setIsTomClarkeEscalated] = useState(false);
   const [isHaftpflichtQuarantined, setIsHaftpflichtQuarantined] = useState(false);
   const [isDuplicatesMerged, setIsDuplicatesMerged] = useState(false);
-  const [isReopenedArchived, setIsReopenedArchived] = useState(false);
   const [isGlassDispatched, setIsGlassDispatched] = useState(false);
   const [isDekraDispatched, setIsDekraDispatched] = useState(false);
 
@@ -72,7 +71,6 @@ export default function Home() {
     if (isTomClarkeEscalated) { handled += 1; hoursSaved += 0.5; }
     if (isHaftpflichtQuarantined) { handled += 33; hoursSaved += 8.25; }
     if (isDuplicatesMerged) { handled += 42; hoursSaved += 10.5; }
-    if (isReopenedArchived) { handled += 4; hoursSaved += 1.0; }
     if (isGlassDispatched) { handled += 117; hoursSaved += 19.5; }
     if (isDekraDispatched) { handled += 39; hoursSaved += 6.5; }
 
@@ -85,7 +83,6 @@ export default function Home() {
     isTomClarkeEscalated,
     isHaftpflichtQuarantined,
     isDuplicatesMerged,
-    isReopenedArchived,
     isGlassDispatched,
     isDekraDispatched
   ]);
@@ -93,7 +90,6 @@ export default function Home() {
   // Filtered claims list
   const filteredClaims = useMemo(() => {
     return claims.filter((c) => {
-      // Search matching
       const query = searchQuery.toLowerCase().trim();
       if (query) {
         const matchesQuery = 
@@ -107,7 +103,6 @@ export default function Home() {
 
       const assessment = assessments.get(c.claim_id);
 
-      // Category filter
       if (filterCategory === 'urgent') {
         return assessment?.overallDecision === 'URGENT_DEADLINE' || c.claim_id === 'KS-26-104234' || c.claim_id === 'KS-26-104413';
       }
@@ -169,7 +164,7 @@ export default function Home() {
     return aiDrafts.find(d => d.claim_id === selectedClaimId) || null;
   }, [selectedClaimId, aiDrafts]);
 
-  // Actions handlers
+  // Action handlers
   const handleApproveAutohaus = () => {
     setIsAutohausApproved(true);
     setClaims(prev => prev.map(c => c.claim_id === 'KS-26-104234' ? { ...c, status: 'approved' } : c));
@@ -189,11 +184,6 @@ export default function Home() {
     setClaims(prev => prev.map(c => c.is_duplicate ? { ...c, status: 'merged' } : c));
   };
 
-  const handleArchiveReopened = () => {
-    setIsReopenedArchived(true);
-    setClaims(prev => prev.map(c => c.status === 'reopened' ? { ...c, status: 'closed' } : c));
-  };
-
   const handleDispatchGlass = () => {
     setIsGlassDispatched(true);
   };
@@ -209,7 +199,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-sky-500 selection:text-white">
       
       {/* Top Header */}
       <Header
@@ -221,284 +211,274 @@ export default function Home() {
         hoursSaved={stats.hoursSaved}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* Main Workspace */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-7 space-y-7">
         
-        {/* Emergency Alert Banner */}
-        <EmergencyAlertBanner
+        {/* KPI Strip */}
+        <KPIMetricsBar
+          totalClaims={claims.length}
+          handledCount={stats.handledCount}
+          hoursSaved={stats.hoursSaved}
+          isAutohausApproved={isAutohausApproved}
+          isHaftpflichtQuarantined={isHaftpflichtQuarantined}
+        />
+
+        {/* Attention & Action Queue */}
+        <AttentionCenter
           onSelectClaim={(id) => setSelectedClaimId(id)}
           isAutohausApproved={isAutohausApproved}
           isTomClarkeEscalated={isTomClarkeEscalated}
           isHaftpflichtQuarantined={isHaftpflichtQuarantined}
+          isDuplicatesMerged={isDuplicatesMerged}
+          isGlassDispatched={isGlassDispatched}
+          isDekraDispatched={isDekraDispatched}
           onApproveAutohaus={handleApproveAutohaus}
           onEscalateTomClarke={handleEscalateTomClarke}
           onQuarantineHaftpflicht={handleQuarantineHaftpflicht}
-        />
-
-        {/* Batch Action Toolbar */}
-        <BatchActionToolbar
-          duplicatesCount={21}
-          reopenedCount={4}
-          glassCount={117}
-          standardHailCount={39}
-          isDuplicatesMerged={isDuplicatesMerged}
-          isReopenedArchived={isReopenedArchived}
-          isGlassDispatched={isGlassDispatched}
-          isDekraDispatched={isDekraDispatched}
           onMergeDuplicates={handleMergeDuplicates}
-          onArchiveReopened={handleArchiveReopened}
           onDispatchGlass={handleDispatchGlass}
           onDispatchDekra={handleDispatchDekra}
         />
 
-        {/* Search & Filter Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+        {/* Claims Ledger Section */}
+        <div className="space-y-3.5">
           
-          {/* Search Box */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search by claim ID, plate (M-...), policy, or name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500"
-            />
+          {/* Controls Bar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            
+            {/* Segmented Category Filter */}
+            <div className="flex items-center space-x-1 p-1 bg-slate-900 border border-slate-800 rounded-xl text-xs overflow-x-auto">
+              <button
+                onClick={() => setFilterCategory('all')}
+                className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap ${
+                  filterCategory === 'all'
+                    ? 'bg-slate-800 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                All (270)
+              </button>
+              <button
+                onClick={() => setFilterCategory('urgent')}
+                className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
+                  filterCategory === 'urgent'
+                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                    : 'text-slate-400 hover:text-amber-400'
+                }`}
+              >
+                <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                <span>Urgent (2)</span>
+              </button>
+              <button
+                onClick={() => setFilterCategory('human')}
+                className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
+                  filterCategory === 'human'
+                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                    : 'text-slate-400 hover:text-rose-400'
+                }`}
+              >
+                <UserCheck className="w-3.5 h-3.5 text-rose-400" />
+                <span>Human Review (35)</span>
+              </button>
+              <button
+                onClick={() => setFilterCategory('autonomous')}
+                className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
+                  filterCategory === 'autonomous'
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                    : 'text-slate-400 hover:text-emerald-400'
+                }`}
+              >
+                <Bot className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Autonomous Ready (156)</span>
+              </button>
+              <button
+                onClick={() => setFilterCategory('duplicates')}
+                className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1.5 ${
+                  filterCategory === 'duplicates'
+                    ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'
+                    : 'text-slate-400 hover:text-indigo-400'
+                }`}
+              >
+                <Merge className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Duplicates (21)</span>
+              </button>
+              <button
+                onClick={() => setFilterCategory('pre_storm')}
+                className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap ${
+                  filterCategory === 'pre_storm'
+                    ? 'bg-slate-800 text-white shadow-xs'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Pre-Storm (60)
+              </button>
+            </div>
+
+            {/* Search Input */}
+            <div className="relative min-w-[280px]">
+              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Filter by plate, name, claim ID..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-500 transition"
+              />
+            </div>
+
           </div>
 
-          {/* Filter Pills */}
-          <div className="flex items-center space-x-1 overflow-x-auto pb-1 sm:pb-0 text-xs">
-            <button
-              onClick={() => setFilterCategory('all')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap ${
-                filterCategory === 'all'
-                  ? 'bg-sky-600 text-white'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              All (270)
-            </button>
-            <button
-              onClick={() => setFilterCategory('urgent')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1 ${
-                filterCategory === 'urgent'
-                  ? 'bg-amber-600 text-white'
-                  : 'text-amber-400 hover:bg-amber-500/10'
-              }`}
-            >
-              <AlertCircle className="w-3.5 h-3.5" />
-              <span>Urgent (2)</span>
-            </button>
-            <button
-              onClick={() => setFilterCategory('human')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1 ${
-                filterCategory === 'human'
-                  ? 'bg-rose-600 text-white'
-                  : 'text-rose-400 hover:bg-rose-500/10'
-              }`}
-            >
-              <UserCheck className="w-3.5 h-3.5" />
-              <span>Human Review (35)</span>
-            </button>
-            <button
-              onClick={() => setFilterCategory('autonomous')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1 ${
-                filterCategory === 'autonomous'
-                  ? 'bg-emerald-600 text-white'
-                  : 'text-emerald-400 hover:bg-emerald-500/10'
-              }`}
-            >
-              <Bot className="w-3.5 h-3.5" />
-              <span>Autonomous (156)</span>
-            </button>
-            <button
-              onClick={() => setFilterCategory('duplicates')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap flex items-center space-x-1 ${
-                filterCategory === 'duplicates'
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-indigo-400 hover:bg-indigo-500/10'
-              }`}
-            >
-              <Merge className="w-3.5 h-3.5" />
-              <span>Duplicates (21)</span>
-            </button>
-            <button
-              onClick={() => setFilterCategory('pre_storm')}
-              className={`px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap ${
-                filterCategory === 'pre_storm'
-                  ? 'bg-slate-700 text-white'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              Pre-Storm (60)
-            </button>
-          </div>
-
-        </div>
-
-        {/* Claims Table */}
-        <div className="bg-slate-950/70 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/60 text-slate-400 font-mono uppercase tracking-wider text-[11px]">
-                  <th className="py-3 px-4">Claim ID &amp; Channel</th>
-                  <th className="py-3 px-4">Policyholder &amp; Vehicle</th>
-                  <th className="py-3 px-4">Coverage &amp; Deductible</th>
-                  <th className="py-3 px-4">Damage &amp; Anomaly Signals</th>
-                  <th className="py-3 px-4">Rule Engine Decision</th>
-                  <th className="py-3 px-4 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {filteredClaims.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-500 text-xs">
-                      No claims match the selected criteria.
-                    </td>
+          {/* Clean Claims Ledger Table */}
+          <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl overflow-hidden shadow-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-slate-800/80 bg-slate-900/60 text-slate-400 font-mono uppercase tracking-wider text-[11px]">
+                    <th className="py-3 px-4 font-medium">Claim &amp; Channel</th>
+                    <th className="py-3 px-4 font-medium">Customer &amp; Vehicle</th>
+                    <th className="py-3 px-4 font-medium">Policy Coverage</th>
+                    <th className="py-3 px-4 font-medium">Signals &amp; Flags</th>
+                    <th className="py-3 px-4 font-medium">Rule Engine Action</th>
+                    <th className="py-3 px-4 text-right font-medium">Review</th>
                   </tr>
-                ) : (
-                  filteredClaims.map((claim) => {
-                    const assessment = assessments.get(claim.claim_id);
-                    const isSelected = selectedClaimId === claim.claim_id;
+                </thead>
+                <tbody className="divide-y divide-slate-800/50">
+                  {filteredClaims.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center text-slate-500 text-xs">
+                        No claims match the active filter or query.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredClaims.map((claim) => {
+                      const assessment = assessments.get(claim.claim_id);
+                      const isSelected = selectedClaimId === claim.claim_id;
 
-                    return (
-                      <tr
-                        key={claim.claim_id}
-                        onClick={() => setSelectedClaimId(claim.claim_id)}
-                        className={`cursor-pointer transition hover:bg-slate-850 ${
-                          isSelected ? 'bg-sky-950/30' : 'hover:bg-slate-900/50'
-                        } ${
-                          claim.claim_id === 'KS-26-104234' && !isAutohausApproved ? 'bg-amber-950/20' : ''
-                        } ${
-                          claim.claim_id === 'KS-26-104413' && !isTomClarkeEscalated ? 'bg-rose-950/20' : ''
-                        }`}
-                      >
-                        {/* 1. Claim ID & Channel */}
-                        <td className="py-3 px-4">
-                          <div className="font-mono font-bold text-sky-400">{claim.claim_id}</div>
-                          <div className="text-[11px] text-slate-400 flex items-center space-x-1.5 mt-0.5">
-                            <span className="capitalize">{claim.channel}</span>
-                            <span>·</span>
-                            <span>{claim.opened_at.split(' ')[1]}</span>
-                          </div>
-                        </td>
+                      return (
+                        <tr
+                          key={claim.claim_id}
+                          onClick={() => setSelectedClaimId(claim.claim_id)}
+                          className={`cursor-pointer transition ${
+                            isSelected 
+                              ? 'bg-sky-950/40' 
+                              : 'hover:bg-slate-850/50'
+                          }`}
+                        >
+                          {/* 1. Claim & Channel */}
+                          <td className="py-3.5 px-4">
+                            <div className="font-mono font-semibold text-sky-400">{claim.claim_id}</div>
+                            <div className="text-[11px] text-slate-400 flex items-center space-x-1.5 mt-0.5">
+                              {claim.channel === 'voice' && <Phone className="w-3 h-3 text-indigo-400" />}
+                              {claim.channel === 'email' && <Mail className="w-3 h-3 text-sky-400" />}
+                              {claim.channel === 'whatsapp' && <MessageSquare className="w-3 h-3 text-emerald-400" />}
+                              <span className="capitalize">{claim.channel}</span>
+                              <span>·</span>
+                              <span>{claim.opened_at.split(' ')[1]}</span>
+                            </div>
+                          </td>
 
-                        {/* 2. Policyholder & Vehicle */}
-                        <td className="py-3 px-4">
-                          <div className="font-medium text-slate-200">
-                            {claim.holder_name || claim.reported_name || 'Unassigned'}
-                          </div>
-                          <div className="text-[11px] text-slate-400 flex items-center space-x-1.5 mt-0.5">
-                            <span className="font-mono text-amber-300 font-semibold">{claim.reported_plate || 'No Plate'}</span>
-                            {claim.vehicle && <span>· {claim.vehicle}</span>}
-                          </div>
-                        </td>
+                          {/* 2. Customer & Vehicle */}
+                          <td className="py-3.5 px-4">
+                            <div className="font-medium text-slate-200">
+                              {claim.holder_name || claim.reported_name || 'Unassigned'}
+                            </div>
+                            <div className="text-[11px] text-slate-400 flex items-center space-x-1.5 mt-0.5">
+                              <span className="font-mono text-amber-300 font-medium">{claim.reported_plate || 'No Plate'}</span>
+                              {claim.vehicle && <span>· {claim.vehicle}</span>}
+                            </div>
+                          </td>
 
-                        {/* 3. Coverage & Deductible */}
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-1.5">
-                            <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${
-                              claim.policy_coverage === 'Vollkasko' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
-                              claim.policy_coverage === 'Teilkasko' ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30' :
-                              'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                          {/* 3. Coverage */}
+                          <td className="py-3.5 px-4">
+                            <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium ${
+                              claim.policy_coverage === 'Vollkasko' ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' :
+                              claim.policy_coverage === 'Teilkasko' ? 'bg-sky-500/10 text-sky-300 border border-sky-500/20' :
+                              'bg-rose-500/10 text-rose-300 border border-rose-500/20'
                             }`}>
                               {claim.policy_coverage || 'Unlinked'}
                             </span>
-                          </div>
-                          <div className="text-[11px] text-slate-400 mt-0.5">
-                            TK Ded: €{claim.deductible_teilkasko_eur ?? 150}
-                          </div>
-                        </td>
+                            <div className="text-[11px] text-slate-400 mt-0.5">
+                              Ded: €{claim.deductible_teilkasko_eur ?? 150}
+                            </div>
+                          </td>
 
-                        {/* 4. Damage & Signals */}
-                        <td className="py-3 px-4">
-                          <div className="flex flex-wrap gap-1 max-w-xs">
-                            {claim.claim_id === 'KS-26-104234' && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                                12:00 Deadline
-                              </span>
-                            )}
-                            {claim.claim_id === 'KS-26-104413' && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                                Mobility &gt;14d
-                              </span>
-                            )}
-                            {claim.is_storm_claim && claim.policy_coverage === 'Haftpflicht' && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/30">
-                                Liability Only
-                              </span>
-                            )}
-                            {claim.has_glass && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                                Broken Glass
-                              </span>
-                            )}
-                            {claim.is_duplicate && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                                Duplicate
-                              </span>
-                            )}
-                            {claim.status === 'reopened' && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                                Courtesy Reopened
-                              </span>
-                            )}
-                            {!claim.has_glass && claim.is_storm_claim && claim.policy_coverage !== 'Haftpflicht' && !claim.is_duplicate && (
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400">
-                                Standard Dents
-                              </span>
-                            )}
-                          </div>
-                        </td>
+                          {/* 4. Signals */}
+                          <td className="py-3.5 px-4">
+                            <div className="flex flex-wrap gap-1 max-w-xs">
+                              {claim.claim_id === 'KS-26-104234' && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                  12:00 Deadline
+                                </span>
+                              )}
+                              {claim.claim_id === 'KS-26-104413' && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                  Mobility &gt;14d
+                                </span>
+                              )}
+                              {claim.is_storm_claim && claim.policy_coverage === 'Haftpflicht' && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-red-500/20 text-red-300 border border-red-500/30">
+                                  Liability Only
+                                </span>
+                              )}
+                              {claim.has_glass && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                                  Broken Glass
+                                </span>
+                              )}
+                              {claim.is_duplicate && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                                  Duplicate
+                                </span>
+                              )}
+                              {!claim.has_glass && claim.is_storm_claim && claim.policy_coverage !== 'Haftpflicht' && !claim.is_duplicate && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-slate-400">
+                                  Dents Only
+                                </span>
+                              )}
+                            </div>
+                          </td>
 
-                        {/* 5. Rule Engine Decision */}
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-1.5">
-                            {assessment?.overallDecision === 'URGENT_DEADLINE' && (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center space-x-1">
-                                <AlertTriangle className="w-3 h-3" />
-                                <span>Urgent Clock</span>
-                              </span>
-                            )}
-                            {assessment?.overallDecision === 'HUMAN_REVIEW_REQUIRED' && (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center space-x-1">
-                                <UserCheck className="w-3 h-3" />
-                                <span>Human Review</span>
-                              </span>
-                            )}
-                            {assessment?.overallDecision === 'AUTONOMOUS' && (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center space-x-1">
-                                <Bot className="w-3 h-3" />
-                                <span>Autonomous</span>
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-[11px] text-slate-400 mt-1 truncate max-w-xs">
-                            {assessment?.primaryAction}
-                          </div>
-                        </td>
+                          {/* 5. Rule Engine Action */}
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-center space-x-1.5">
+                              {assessment?.overallDecision === 'URGENT_DEADLINE' && (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                  Urgent Action
+                                </span>
+                              )}
+                              {assessment?.overallDecision === 'HUMAN_REVIEW_REQUIRED' && (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                  Human Review
+                                </span>
+                              )}
+                              {assessment?.overallDecision === 'AUTONOMOUS' && (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                  Autonomous
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-slate-400 mt-1 truncate max-w-xs">
+                              {assessment?.primaryAction}
+                            </div>
+                          </td>
 
-                        {/* 6. Action Button */}
-                        <td className="py-3 px-4 text-right">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedClaimId(claim.claim_id);
-                            }}
-                            className="px-2.5 py-1 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg transition"
-                          >
-                            Inspect
-                          </button>
-                        </td>
+                          {/* 6. Action */}
+                          <td className="py-3.5 px-4 text-right">
+                            <span className="text-xs text-sky-400 hover:text-sky-300 font-medium inline-flex items-center space-x-0.5">
+                              <span>Inspect</span>
+                              <ChevronRight className="w-3.5 h-3.5" />
+                            </span>
+                          </td>
 
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
+
         </div>
 
       </main>
