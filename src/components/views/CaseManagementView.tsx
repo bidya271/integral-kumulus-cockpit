@@ -45,6 +45,245 @@ interface CaseManagementViewProps {
   onUpdateClaimStatus: (claimId: string, newStatus: string, notes?: string) => void;
   onSendMessage?: (claimId: string, content: string, channel: string) => void;
   initialFilter?: string;
+  isAutohausApproved?: boolean;
+  isTomClarkeEscalated?: boolean;
+  isHaftpflichtQuarantined?: boolean;
+  isDuplicatesMerged?: boolean;
+  isGlassDispatched?: boolean;
+  isDekraDispatched?: boolean;
+}
+
+export interface ClaimTriageInfo {
+  isSolved: boolean;
+  statusCategory: 'solved' | 'unsolved';
+  badgeLabel: string;
+  badgeStyle: string;
+  recommendedAction: string;
+  reasoning: string;
+  ruleCode: string;
+  ruleName: string;
+  financialImpact?: string;
+  solvedVia?: string;
+}
+
+export function getClaimTriageDetails(
+  claim: Claim,
+  assessment?: ClaimAssessment,
+  flags?: {
+    isAutohausApproved?: boolean;
+    isTomClarkeEscalated?: boolean;
+    isHaftpflichtQuarantined?: boolean;
+    isDuplicatesMerged?: boolean;
+    isGlassDispatched?: boolean;
+    isDekraDispatched?: boolean;
+  }
+): ClaimTriageInfo {
+  const {
+    isAutohausApproved = false,
+    isTomClarkeEscalated = false,
+    isHaftpflichtQuarantined = false,
+    isDuplicatesMerged = false,
+    isGlassDispatched = false,
+    isDekraDispatched = false
+  } = flags || {};
+
+  // Case 1: Autohaus Brandl (KS-26-104234)
+  if (claim.claim_id === 'KS-26-104234') {
+    if (isAutohausApproved || claim.status === 'approved') {
+      return {
+        isSolved: true,
+        statusCategory: 'solved',
+        badgeLabel: 'SOLVED · Freigabe Approved',
+        badgeStyle: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+        recommendedAction: 'Approved net KVA €3,860 before 12:00 PM deadline.',
+        reasoning: 'Autohaus Brandl net KVA €3,860 verified <= Dekra calculation benchmark (€3,910). Reserved 13:00 repair slot secured.',
+        ruleCode: 'RULE_3_WORKSHOP_DEADLINE',
+        ruleName: 'Rule 3: Partner Workshop Approval & Deadline',
+        financialImpact: '€3,860 Net Repair Authorized · Slot 13:00 Confirmed',
+        solvedVia: 'Operations Pulse / Lena Huber'
+      };
+    }
+    return {
+      isSolved: false,
+      statusCategory: 'unsolved',
+      badgeLabel: 'ACTION NEEDED · 12:00 Deadline',
+      badgeStyle: 'bg-amber-100 text-amber-950 border-amber-400 font-bold animate-pulse',
+      recommendedAction: 'Approve formal written Reparaturfreigabe (€3,860 net) before 12:00 PM.',
+      reasoning: 'Estimate €3,860 net is under Dekra benchmark (€3,910). If unapproved by 12:00 PM, today’s 13:00 reserved repair slot will be lost!',
+      ruleCode: 'RULE_3_WORKSHOP_DEADLINE',
+      ruleName: 'Rule 3: Partner Workshop Approval & Deadline',
+      financialImpact: '€3,860 Net Repair at Risk',
+    };
+  }
+
+  // Case 2: Tom Clarke (KS-26-104413)
+  if (claim.claim_id === 'KS-26-104413') {
+    if (isTomClarkeEscalated || claim.status === 'in_review') {
+      return {
+        isSolved: true,
+        statusCategory: 'solved',
+        badgeLabel: 'SOLVED · Escalated to Team Lead',
+        badgeStyle: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+        recommendedAction: 'Escalated to Team Lead for 21-day rental overage authorization.',
+        reasoning: 'Customer requested rental car through July 22. Standard policy caps mobility at 14 days; formal sign-off submitted.',
+        ruleCode: 'RULE_7_MOBILITY_LIMIT',
+        ruleName: 'Rule 7: Mobility Cover 14-Day Limit',
+        financialImpact: '7 Additional Rental Days Awaiting Lead Sign-off',
+        solvedVia: 'Operations Pulse / Lena Huber'
+      };
+    }
+    return {
+      isSolved: false,
+      statusCategory: 'unsolved',
+      badgeLabel: 'ACTION NEEDED · Rule 7 Mobility Cap',
+      badgeStyle: 'bg-rose-100 text-rose-950 border-rose-400 font-bold',
+      recommendedAction: 'Escalate to Team Lead before 14-day rental limit expires tomorrow.',
+      reasoning: 'Naive AI drafted unauthorized promise of free rental through July 22 (>14 days), violating handbook rules.',
+      ruleCode: 'RULE_7_MOBILITY_LIMIT',
+      ruleName: 'Rule 7: Mobility Cover 14-Day Limit',
+      financialImpact: 'Unauthorized Rental Car Cost Risk',
+    };
+  }
+
+  // Case 3: Haftpflicht Storm Claims (33 claims)
+  if (claim.is_storm_claim && claim.policy_coverage === 'Haftpflicht') {
+    if (isHaftpflichtQuarantined || claim.notes?.includes('Quarantined') || claim.status === 'in_review') {
+      return {
+        isSolved: true,
+        statusCategory: 'solved',
+        badgeLabel: 'SOLVED · Quarantined (€4k Saved)',
+        badgeStyle: 'bg-purple-100 text-purple-900 border-purple-300',
+        recommendedAction: 'Halted naive AI draft & queued empathetic Haftpflicht rejection letter.',
+        reasoning: 'Policy covers third-party liability only. Hail damage to own vehicle is strictly excluded under German insurance law. Prevented €4,000 false payout.',
+        ruleCode: 'RULE_1_HAFTPFLICHT_HAZARD',
+        ruleName: 'Rule 1: Coverage Verification (Haftpflicht)',
+        financialImpact: '€4,000 Fraud Leakage Prevented',
+        solvedVia: 'Operations Pulse Batch Quarantine'
+      };
+    }
+    return {
+      isSolved: false,
+      statusCategory: 'unsolved',
+      badgeLabel: 'ACTION NEEDED · Haftpflicht Risk',
+      badgeStyle: 'bg-rose-100 text-rose-950 border-rose-300 font-bold',
+      recommendedAction: 'Quarantine claim and suppress naive AI coverage confirmation draft.',
+      reasoning: 'Policyholder has liability (Haftpflicht) only. Hail is completely uncovered. Sending naive draft risks €4,000 leakage!',
+      ruleCode: 'RULE_1_HAFTPFLICHT_HAZARD',
+      ruleName: 'Rule 1: Coverage Verification (Haftpflicht)',
+      financialImpact: '€4,000 Potential Fraud Leakage',
+    };
+  }
+
+  // Case 4: Duplicate FNOL Records (42 claims)
+  if (claim.is_duplicate) {
+    if (isDuplicatesMerged || claim.status === 'merged') {
+      return {
+        isSolved: true,
+        statusCategory: 'solved',
+        badgeLabel: 'SOLVED · Duplicate Merged',
+        badgeStyle: 'bg-gray-100 text-gray-800 border-gray-300',
+        recommendedAction: `Consolidated into primary claim ${claim.duplicate_of_claim_id || 'earlier record'}.`,
+        reasoning: 'Multi-channel duplicate intake detected and consolidated. Redundant customer outbound messages suppressed.',
+        ruleCode: 'RULE_4_DUPLICATE_MERGE',
+        ruleName: 'Rule 4: Multi-Channel Deduplication',
+        solvedVia: 'Operations Pulse Batch Deduplication'
+      };
+    }
+    return {
+      isSolved: false,
+      statusCategory: 'unsolved',
+      badgeLabel: 'ACTION NEEDED · Merge Duplicate',
+      badgeStyle: 'bg-indigo-100 text-indigo-900 border-indigo-300',
+      recommendedAction: `Merge into primary claim ${claim.duplicate_of_claim_id || 'master record'} and silence duplicate messages.`,
+      reasoning: 'Customer submitted duplicate FNOL across WhatsApp/Email for identical vehicle and storm event.',
+      ruleCode: 'RULE_4_DUPLICATE_MERGE',
+      ruleName: 'Rule 4: Multi-Channel Deduplication',
+    };
+  }
+
+  // Case 5: Glass Emergency (117 claims)
+  if (claim.is_storm_claim && claim.has_glass && claim.policy_coverage !== 'Haftpflicht') {
+    if (isGlassDispatched || claim.notes?.includes('Klarsicht')) {
+      return {
+        isSolved: true,
+        statusCategory: 'solved',
+        badgeLabel: 'SOLVED · Klarsicht Dispatched',
+        badgeStyle: 'bg-emerald-100 text-emerald-900 border-emerald-300',
+        recommendedAction: 'Dispatched on-site mobile booking link to partner Klarsicht Autoglas.',
+        reasoning: `Broken glass renders vehicle unroadworthy. Priority mobile repair sent directly to customer address. Teilkasko deductible €${claim.deductible_teilkasko_eur ?? 150} applies.`,
+        ruleCode: 'RULE_5_GLASS_EMERGENCY',
+        ruleName: 'Rule 5: Glass Emergency & Roadworthiness',
+        financialImpact: `Deductible: €${claim.deductible_teilkasko_eur ?? 150} Teilkasko`,
+        solvedVia: 'Operations Pulse Batch Dispatch'
+      };
+    }
+    return {
+      isSolved: false,
+      statusCategory: 'unsolved',
+      badgeLabel: 'BATCH READY · Mobile Glass',
+      badgeStyle: 'bg-emerald-50 text-emerald-900 border-emerald-300',
+      recommendedAction: 'Send automated on-site mobile booking link for Klarsicht Autoglas.',
+      reasoning: 'Broken glass forbids driving under safety guidelines. On-site mobile technician required immediately.',
+      ruleCode: 'RULE_5_GLASS_EMERGENCY',
+      ruleName: 'Rule 5: Glass Emergency & Roadworthiness',
+      financialImpact: `Deductible: €${claim.deductible_teilkasko_eur ?? 150} Teilkasko`,
+    };
+  }
+
+  // Case 6: Dekra Drive-In Mass Inspection (39 claims)
+  if (claim.is_storm_claim && !claim.has_glass && claim.policy_coverage !== 'Haftpflicht' && !claim.is_duplicate) {
+    if (isDekraDispatched || claim.notes?.includes('Olympia-Park')) {
+      return {
+        isSolved: true,
+        statusCategory: 'solved',
+        badgeLabel: 'SOLVED · Dekra Drive-In Scheduled',
+        badgeStyle: 'bg-sky-100 text-sky-900 border-sky-300',
+        recommendedAction: 'Scheduled appointment slot at Munich Olympia-Park Drive-In Center.',
+        reasoning: `Drivable vehicle with sheet metal hail dents. Mass assessment scheduled. Teilkasko deductible €${claim.deductible_teilkasko_eur ?? 150}.`,
+        ruleCode: 'RULE_6_DEKRA_MASS_ASSESSMENT',
+        ruleName: 'Rule 6: Mass Hail Assessment (Sammelbesichtigung)',
+        financialImpact: `Deductible: €${claim.deductible_teilkasko_eur ?? 150} Teilkasko`,
+        solvedVia: 'Operations Pulse Batch Dispatch'
+      };
+    }
+    return {
+      isSolved: false,
+      statusCategory: 'unsolved',
+      badgeLabel: 'BATCH READY · Dekra Center',
+      badgeStyle: 'bg-sky-50 text-sky-900 border-sky-300',
+      recommendedAction: 'Send appointment booking link for Munich Dekra Drive-In assessment.',
+      reasoning: 'Vehicle is drivable with hail dents. Mass drive-in center avoids 4-week inspection delay.',
+      ruleCode: 'RULE_6_DEKRA_MASS_ASSESSMENT',
+      ruleName: 'Rule 6: Mass Hail Assessment (Sammelbesichtigung)',
+      financialImpact: `Deductible: €${claim.deductible_teilkasko_eur ?? 150} Teilkasko`,
+    };
+  }
+
+  // Standard Claims
+  if (claim.status === 'closed' || claim.status === 'approved') {
+    return {
+      isSolved: true,
+      statusCategory: 'solved',
+      badgeLabel: `SOLVED · ${claim.status.toUpperCase()}`,
+      badgeStyle: 'bg-gray-100 text-gray-800 border-gray-300',
+      recommendedAction: 'Case finalized and closed.',
+      reasoning: 'Claim documentation complete and verified.',
+      ruleCode: 'STANDARD_WORKFLOW',
+      ruleName: 'Standard Underwriting Workflow',
+      solvedVia: 'Manual Handler Resolution'
+    };
+  }
+
+  return {
+    isSolved: false,
+    statusCategory: 'unsolved',
+    badgeLabel: 'IN PROGRESS · Pre-Storm Desk',
+    badgeStyle: 'bg-gray-100 text-gray-700 border-gray-200',
+    recommendedAction: assessment?.primaryAction || 'Desk review and verification.',
+    reasoning: assessment?.evaluations[0]?.message || 'Pre-existing claim opened prior to Munich storm event.',
+    ruleCode: 'STANDARD_WORKFLOW',
+    ruleName: 'Standard Desk Process',
+  };
 }
 
 export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
@@ -60,8 +299,33 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
   onSelectClaimId,
   onUpdateClaimStatus,
   onSendMessage,
-  initialFilter = 'all'
+  initialFilter = 'all',
+  isAutohausApproved = false,
+  isTomClarkeEscalated = false,
+  isHaftpflichtQuarantined = false,
+  isDuplicatesMerged = false,
+  isGlassDispatched = false,
+  isDekraDispatched = false
 }) => {
+  const flags = useMemo(() => ({
+    isAutohausApproved,
+    isTomClarkeEscalated,
+    isHaftpflichtQuarantined,
+    isDuplicatesMerged,
+    isGlassDispatched,
+    isDekraDispatched
+  }), [
+    isAutohausApproved,
+    isTomClarkeEscalated,
+    isHaftpflichtQuarantined,
+    isDuplicatesMerged,
+    isGlassDispatched,
+    isDekraDispatched
+  ]);
+
+  // Primary Triage Filter: All vs Unsolved vs Solved
+  const [triageFilter, setTriageFilter] = useState<'all' | 'unsolved' | 'solved'>('all');
+
   // Filters
   const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'in_review' | 'approved' | 'closed'>('all');
   const [channelFilter, setChannelFilter] = useState<'all' | 'app' | 'email' | 'voice' | 'whatsapp' | 'service_desk'>('all');
@@ -82,9 +346,26 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
     return map;
   }, [policies]);
 
+  // Count solved vs unsolved claims dynamically
+  const { solvedCount, unsolvedCount } = useMemo(() => {
+    let solved = 0;
+    for (const c of claims) {
+      const triage = getClaimTriageDetails(c, assessments.get(c.claim_id), flags);
+      if (triage.isSolved) solved++;
+    }
+    return {
+      solvedCount: solved,
+      unsolvedCount: claims.length - solved
+    };
+  }, [claims, assessments, flags]);
+
   // Sync initial filter if passed
   React.useEffect(() => {
-    if (initialFilter === 'urgent') {
+    if (initialFilter === 'unsolved') {
+      setTriageFilter('unsolved');
+    } else if (initialFilter === 'solved') {
+      setTriageFilter('solved');
+    } else if (initialFilter === 'urgent') {
       setStatusFilter('in_review');
     } else if (['app', 'email', 'voice', 'whatsapp', 'desk'].includes(initialFilter)) {
       setChannelFilter(initialFilter === 'desk' ? 'service_desk' : (initialFilter as any));
@@ -94,6 +375,13 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
   // Filtered claims
   const filteredClaims = useMemo(() => {
     return claims.filter((c) => {
+      const assessment = assessments.get(c.claim_id);
+      const triage = getClaimTriageDetails(c, assessment, flags);
+
+      // 0. Primary Triage Filter (Solved vs Unsolved)
+      if (triageFilter === 'unsolved' && triage.isSolved) return false;
+      if (triageFilter === 'solved' && !triage.isSolved) return false;
+
       // 1. Search Query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
@@ -120,7 +408,7 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
 
       return true;
     });
-  }, [claims, searchQuery, statusFilter, channelFilter, coverageFilter]);
+  }, [claims, searchQuery, triageFilter, statusFilter, channelFilter, coverageFilter, assessments, flags]);
 
   // Auto-select first claim if none selected
   React.useEffect(() => {
@@ -159,6 +447,11 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
     if (!selectedVoiceCall?.call_id) return [];
     return voiceTranscripts.filter(t => t.call_id === selectedVoiceCall.call_id);
   }, [selectedVoiceCall, voiceTranscripts]);
+
+  const selectedTriage = useMemo(() => {
+    if (!selectedClaim) return null;
+    return getClaimTriageDetails(selectedClaim, selectedAssessment || undefined, flags);
+  }, [selectedClaim, selectedAssessment, flags]);
 
   const selectedDraft = useMemo(() => {
     if (!selectedClaimId) return null;
@@ -270,7 +563,61 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
       {/* 1. OPERATIONS FILTER BAR */}
       <div className="bg-white border border-gray-200/80 rounded-xl p-3.5 space-y-3 shadow-xs">
         
-        {/* Top: Lifecycle Status Filter + Search */}
+        {/* Primary Triage Clearance Bar: Solved vs Unsolved */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-gray-100 gap-2">
+          <div className="flex items-center space-x-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500 font-mono">Triage Clearance:</span>
+            <div className="flex items-center space-x-1.5 p-1 bg-gray-100/90 rounded-xl text-xs">
+              <button
+                onClick={() => setTriageFilter('all')}
+                className={`px-3 py-1 rounded-lg font-semibold transition ${
+                  triageFilter === 'all'
+                    ? 'bg-white text-gray-950 shadow-2xs'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                All Queue ({claims.length})
+              </button>
+              <button
+                onClick={() => setTriageFilter('unsolved')}
+                className={`px-3 py-1 rounded-lg font-bold transition flex items-center space-x-1.5 ${
+                  triageFilter === 'unsolved'
+                    ? 'bg-amber-100 text-amber-950 border border-amber-300 shadow-2xs'
+                    : 'text-amber-800 hover:bg-amber-50'
+                }`}
+              >
+                <AlertCircle className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+                <span>🚨 Action Needed ({unsolvedCount})</span>
+              </button>
+              <button
+                onClick={() => setTriageFilter('solved')}
+                className={`px-3 py-1 rounded-lg font-bold transition flex items-center space-x-1.5 ${
+                  triageFilter === 'solved'
+                    ? 'bg-emerald-100 text-emerald-950 border border-emerald-300 shadow-2xs'
+                    : 'text-emerald-800 hover:bg-emerald-50'
+                }`}
+              >
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>✅ Solved via Pulse ({solvedCount})</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="text-[11px] text-gray-500">
+            {solvedCount > 0 ? (
+              <span className="text-emerald-700 font-semibold flex items-center space-x-1">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>{((solvedCount / claims.length) * 100).toFixed(0)}% Queue Cleared ({solvedCount} of {claims.length} triaged)</span>
+              </span>
+            ) : (
+              <span className="text-amber-700 font-medium">
+                0% Cleared · Execute batch dispatches in Operations Pulse
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Lifecycle Status Filter + Search */}
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           
           {/* Status Tabs */}
@@ -283,7 +630,7 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
                   : 'text-gray-600 hover:text-gray-950'
               }`}
             >
-              All Queue ({claims.length})
+              All Statuses
             </button>
             <button
               onClick={() => setStatusFilter('open')}
@@ -469,6 +816,7 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
               filteredClaims.map((claim) => {
                 const assessment = assessments.get(claim.claim_id);
                 const isSelected = selectedClaimId === claim.claim_id;
+                const triage = getClaimTriageDetails(claim, assessment, flags);
 
                 return (
                   <div
@@ -476,10 +824,11 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
                     onClick={() => onSelectClaimId(claim.claim_id)}
                     className={`p-3.5 transition cursor-pointer flex flex-col justify-between ${
                       isSelected
-                        ? 'bg-orange-50/60 border-l-4 border-integral-copper-600'
+                        ? 'bg-orange-50/70 border-l-4 border-integral-copper-600 shadow-2xs'
                         : 'hover:bg-gray-50/80'
                     }`}
                   >
+                    {/* Header Row: ID, Channel & Dynamic Triage Status */}
                     <div className="flex items-start justify-between">
                       <div className="flex items-center space-x-2">
                         <span className="font-mono text-xs font-bold text-integral-copper-600">{claim.claim_id}</span>
@@ -491,27 +840,35 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
                         </span>
                       </div>
 
-                      {/* Status badge */}
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                        claim.status === 'approved' ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' :
-                        claim.status === 'closed' || claim.status === 'merged' ? 'bg-gray-200 text-gray-700' :
-                        claim.status === 'in_review' || claim.status === 'approval_requested' ? 'bg-amber-100 text-amber-800 border border-amber-300' :
-                        'bg-sky-50 text-sky-800 border border-sky-200'
-                      }`}>
-                        {claim.status === 'in_review' ? 'In Review' : claim.status}
+                      {/* Triage Clearance & Status Badge */}
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border transition ${triage.badgeStyle}`}>
+                        {triage.badgeLabel}
                       </span>
                     </div>
 
+                    {/* Customer & License Plate */}
                     <div className="mt-1 flex items-center justify-between text-xs">
-                      <span className="font-semibold text-gray-950 truncate max-w-[180px]">
-                        {claim.holder_name || claim.reported_name || 'Unassigned'}
+                      <span className="font-bold text-gray-950 truncate max-w-[200px]">
+                        {claim.holder_name || claim.reported_name || 'Unassigned Customer'}
                       </span>
-                      <span className="font-mono text-[11px] font-semibold text-gray-800 bg-gray-100 px-1 py-0.5 rounded border border-gray-200">
+                      <span className="font-mono text-[11px] font-semibold text-gray-800 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">
                         {claim.reported_plate || 'No Plate'}
                       </span>
                     </div>
 
-                    <div className="mt-2 flex items-center justify-between text-[11px] text-gray-500">
+                    {/* Recommended Action */}
+                    <div className="mt-1.5 flex items-start space-x-1.5 text-[11px] leading-snug">
+                      <span className="font-bold text-[#cf5f09] shrink-0">👉 Action:</span>
+                      <span className="font-semibold text-gray-900 truncate">{triage.recommendedAction}</span>
+                    </div>
+
+                    {/* Operational Reasoning */}
+                    <div className="mt-0.5 text-[10px] text-gray-500 leading-snug truncate">
+                      <span className="font-medium text-gray-600">💡 Reason:</span> {triage.reasoning}
+                    </div>
+
+                    {/* Footer Row: Coverage, Flags & Impact */}
+                    <div className="mt-2.5 pt-2 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-500">
                       <div className="flex items-center space-x-1.5">
                         <span className={`font-semibold px-1.5 py-0.2 rounded text-[10px] ${
                           claim.policy_coverage === 'Vollkasko' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' :
@@ -521,7 +878,7 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
                           {claim.policy_coverage || 'Unlinked'}
                         </span>
                         {claim.claim_id === 'KS-26-104234' && (
-                          <span className="px-1.5 py-0.2 rounded text-[10px] bg-amber-100 text-amber-800 border border-amber-300 font-bold">
+                          <span className="px-1.5 py-0.2 rounded text-[10px] bg-amber-100 text-amber-900 border border-amber-300 font-bold">
                             12:00 Deadline
                           </span>
                         )}
@@ -532,9 +889,9 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
                         )}
                       </div>
 
-                      <span className="text-integral-copper-600 font-medium hover:underline flex items-center space-x-0.5">
+                      <span className="text-integral-copper-600 font-semibold hover:underline flex items-center space-x-0.5 text-xs">
                         <span>Inspect</span>
-                        <ChevronRight className="w-3 h-3" />
+                        <ChevronRight className="w-3.5 h-3.5" />
                       </span>
                     </div>
 
@@ -642,30 +999,67 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
                 {activeTabInDetail === 'overview' && (
                   <div className="space-y-4">
                     
-                    {/* Rule Engine Assessment Box */}
-                    {selectedAssessment && (
-                      <div className={`p-4 rounded-xl border ${
-                        selectedAssessment.overallDecision === 'URGENT_DEADLINE'
-                          ? 'bg-amber-50/80 border-amber-300 text-amber-900'
-                          : selectedAssessment.overallDecision === 'HUMAN_REVIEW_REQUIRED'
-                          ? 'bg-rose-50/80 border-rose-300 text-rose-900'
-                          : 'bg-emerald-50/80 border-emerald-300 text-emerald-900'
+                    {/* 1. TRIAGE CLEARANCE & RECOMMENDATION COMMAND CARD */}
+                    {selectedTriage && (
+                      <div className={`p-4 rounded-xl border shadow-2xs space-y-3 ${
+                        selectedTriage.isSolved 
+                          ? 'bg-emerald-50/70 border-emerald-300' 
+                          : 'bg-amber-50/80 border-amber-300'
                       }`}>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-bold uppercase tracking-wider">
-                            {selectedAssessment.overallDecision === 'URGENT_DEADLINE' ? '🚨 Ticking Deadline' :
-                             selectedAssessment.overallDecision === 'HUMAN_REVIEW_REQUIRED' ? '⚠️ Human Review Required' :
-                             '⚡ Autonomous Execution Ready'}
-                          </span>
-                          <span className="text-xs font-mono font-bold">Urgency Score: {selectedAssessment.urgencyScore}/100</span>
-                        </div>
-                        <p className="text-xs font-bold text-gray-950 mt-1">{selectedAssessment.primaryAction}</p>
-
-                        {selectedAssessment.evaluations.map((ev, idx) => (
-                          <div key={idx} className="mt-2 text-xs opacity-90 border-t border-gray-200/60 pt-1.5">
-                            <span className="font-semibold">{ev.ruleName}:</span> {ev.message}
+                        {/* Status Header */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            {selectedTriage.isSolved ? (
+                              <CheckCircle2 className="w-5 h-5 text-emerald-700" />
+                            ) : (
+                              <AlertTriangle className="w-5 h-5 text-amber-700 animate-pulse" />
+                            )}
+                            <div>
+                              <span className="text-xs font-bold uppercase tracking-wider text-gray-950 font-mono">
+                                {selectedTriage.isSolved ? 'TRIAGE STATUS: SOLVED & PROCESSED' : 'TRIAGE STATUS: ACTION REQUIRED'}
+                              </span>
+                              {selectedTriage.solvedVia && (
+                                <span className="text-[10px] text-emerald-800 block font-medium">
+                                  Resolved via {selectedTriage.solvedVia} · GoBD Compliant
+                                </span>
+                              )}
+                            </div>
                           </div>
-                        ))}
+                          <span className={`px-2.5 py-0.5 rounded text-[11px] font-bold border ${selectedTriage.badgeStyle}`}>
+                            {selectedTriage.badgeLabel}
+                          </span>
+                        </div>
+
+                        {/* Recommended Action Box */}
+                        <div className="bg-white/95 p-3 rounded-lg border border-gray-200/90 shadow-2xs">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-[#cf5f09] mb-0.5 flex items-center justify-between">
+                            <span>Recommended Action (Claims Handbook)</span>
+                            <span className="text-gray-400 font-mono">{selectedTriage.ruleCode}</span>
+                          </div>
+                          <div className="text-sm font-bold text-gray-950 leading-snug">
+                            👉 {selectedTriage.recommendedAction}
+                          </div>
+                        </div>
+
+                        {/* Operational Reasoning & Policy Grounding */}
+                        <div className="bg-white/95 p-3 rounded-lg border border-gray-200/90 shadow-2xs space-y-1">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-0.5">
+                            Operational Reasoning &amp; Policy Rule
+                          </div>
+                          <p className="text-xs text-gray-800 leading-relaxed font-sans">
+                            {selectedTriage.reasoning}
+                          </p>
+                        </div>
+
+                        {/* Financial Exposure / Leakage Impact */}
+                        {selectedTriage.financialImpact && (
+                          <div className="flex items-center justify-between text-xs pt-1 px-1 bg-white/60 p-2 rounded-lg border border-gray-200/50">
+                            <span className="font-semibold text-gray-600">Financial / Risk Exposure:</span>
+                            <span className="font-mono font-bold text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded border border-emerald-300">
+                              {selectedTriage.financialImpact}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
 

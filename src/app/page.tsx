@@ -410,6 +410,12 @@ export default function Home() {
                 onUpdateClaimStatus={handleUpdateClaimStatus}
                 onSendMessage={handleSendMessage}
                 initialFilter={initialCaseFilter}
+                isAutohausApproved={isAutohausApproved}
+                isTomClarkeEscalated={isTomClarkeEscalated}
+                isHaftpflichtQuarantined={isHaftpflichtQuarantined}
+                isDuplicatesMerged={isDuplicatesMerged}
+                isGlassDispatched={isGlassDispatched}
+                isDekraDispatched={isDekraDispatched}
               />
             </div>
           )}
