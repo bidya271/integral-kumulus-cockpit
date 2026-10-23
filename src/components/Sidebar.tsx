@@ -103,43 +103,95 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {/* Navigation Links */}
-        <nav className="px-3 space-y-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
+        {/* Navigation Links Grouped by Operational Layer */}
+        <div className="px-3 space-y-4">
+          
+          {/* Group 1: Lena's Operations Cockpit */}
+          <div className="space-y-1">
+            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">
+              Operations · Lena's Desk
+            </div>
+            
+            {navItems.slice(0, 2).map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
 
-            return (
-              <button
-                key={item.id}
-                onClick={() => onSelectTab(item.id)}
-                className={`w-full text-left px-3 py-2.5 rounded-xl transition flex items-center justify-between group ${
-                  isActive
-                    ? 'bg-integral-copper-600 text-white shadow-xs'
-                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-950'
-                }`}
-              >
-                <div className="flex items-center space-x-3 min-w-0">
-                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-integral-copper-600'}`} />
-                  <div className="min-w-0">
-                    <div className="text-xs font-semibold truncate leading-snug">{item.label}</div>
-                    <div className={`text-[10px] truncate ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
-                      {item.description}
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onSelectTab(item.id)}
+                  className={`w-full text-left px-3 py-2.5 rounded-xl transition flex items-center justify-between group ${
+                    isActive
+                      ? 'bg-integral-copper-600 text-white shadow-xs'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-950'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-integral-copper-600'}`} />
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold truncate leading-snug">{item.label}</div>
+                      <div className={`text-[10px] truncate ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
+                        {item.description}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {item.badge && (
-                  <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border shrink-0 ${
-                    isActive ? 'bg-white/20 text-white border-white/30' : item.badgeColor
-                  }`}>
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
+                  {item.badge && (
+                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border shrink-0 ${
+                      isActive ? 'bg-white/20 text-white border-white/30' : item.badgeColor
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Group 2: Platform Governance & Rule Architecture */}
+          <div className="space-y-1 pt-2 border-t border-gray-100">
+            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-gray-400 flex items-center justify-between">
+              <span>Platform Governance</span>
+              <span className="text-[9px] font-normal text-integral-copper-600 font-mono">Lead / Admin</span>
+            </div>
+
+            {navItems.slice(2, 4).map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onSelectTab(item.id)}
+                  className={`w-full text-left px-3 py-2 rounded-xl transition flex items-center justify-between group ${
+                    isActive
+                      ? 'bg-integral-copper-600 text-white shadow-xs'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-950'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-integral-copper-600'}`} />
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold truncate leading-snug">{item.label}</div>
+                      <div className={`text-[10px] truncate ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
+                        {item.description}
+                      </div>
+                    </div>
+                  </div>
+
+                  {item.badge && (
+                    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border shrink-0 ${
+                      isActive ? 'bg-white/20 text-white border-white/30' : item.badgeColor
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+        </div>
       </div>
 
       {/* Bottom Information & Engineering Work Log */}

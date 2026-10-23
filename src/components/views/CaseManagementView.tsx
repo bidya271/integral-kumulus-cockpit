@@ -43,6 +43,7 @@ interface CaseManagementViewProps {
   selectedClaimId: string | null;
   onSelectClaimId: (id: string | null) => void;
   onUpdateClaimStatus: (claimId: string, newStatus: string, notes?: string) => void;
+  onSendMessage?: (claimId: string, content: string, channel: string) => void;
   initialFilter?: string;
 }
 
@@ -58,6 +59,7 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
   selectedClaimId,
   onSelectClaimId,
   onUpdateClaimStatus,
+  onSendMessage,
   initialFilter = 'all'
 }) => {
   // Filters
@@ -68,6 +70,8 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
   const [activeTabInDetail, setActiveTabInDetail] = useState<'overview' | 'diff' | 'timeline'>('overview');
   const [handlerNotes, setHandlerNotes] = useState('');
   const [isNotesSaved, setIsNotesSaved] = useState(false);
+  const [actionFeedbackToast, setActionFeedbackToast] = useState<string | null>(null);
+  const [customReplyText, setCustomReplyText] = useState<string>('');
 
   // Policy map
   const policyMap = useMemo(() => {
@@ -173,8 +177,84 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
     if (selectedClaim) {
       onUpdateClaimStatus(selectedClaim.claim_id, selectedClaim.status, handlerNotes);
       setIsNotesSaved(true);
-      setTimeout(() => setIsNotesSaved(false), 2000);
+      setActionFeedbackToast(`Dossier notes saved for ${selectedClaim.claim_id}`);
+      setTimeout(() => {
+        setIsNotesSaved(false);
+        setActionFeedbackToast(null);
+      }, 2000);
     }
+  };
+
+  // Keyboard Navigation & Triage Hotkeys: [J] Next · [K] Prev · [A] Approve · [E] Escalate · [C] Close/Reopen
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        return;
+      }
+
+      if (e.key === 'j' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const currentIndex = filteredClaims.findIndex(c => c.claim_id === selectedClaimId);
+        if (currentIndex < filteredClaims.length - 1) {
+          onSelectClaimId(filteredClaims[currentIndex + 1].claim_id);
+        }
+      } else if (e.key === 'k' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const currentIndex = filteredClaims.findIndex(c => c.claim_id === selectedClaimId);
+        if (currentIndex > 0) {
+          onSelectClaimId(filteredClaims[currentIndex - 1].claim_id);
+        }
+      } else if (e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
+        if (selectedClaim) {
+          onUpdateClaimStatus(selectedClaim.claim_id, 'approved', 'Approved via rapid shortcut [A]');
+          setActionFeedbackToast(`Claim ${selectedClaim.claim_id} Approved`);
+          setTimeout(() => setActionFeedbackToast(null), 2500);
+        }
+      } else if (e.key === 'e' || e.key === 'E') {
+        e.preventDefault();
+        if (selectedClaim) {
+          onUpdateClaimStatus(selectedClaim.claim_id, 'in_review', 'Escalated to Lead via rapid shortcut [E]');
+          setActionFeedbackToast(`Claim ${selectedClaim.claim_id} Escalated to Lead`);
+          setTimeout(() => setActionFeedbackToast(null), 2500);
+        }
+      } else if (e.key === 'c' || e.key === 'C') {
+        e.preventDefault();
+        if (selectedClaim) {
+          const nextStatus = selectedClaim.status === 'closed' ? 'new' : 'closed';
+          onUpdateClaimStatus(selectedClaim.claim_id, nextStatus);
+          setActionFeedbackToast(`Claim ${selectedClaim.claim_id} marked as ${nextStatus === 'closed' ? 'Closed' : 'Reopened'}`);
+          setTimeout(() => setActionFeedbackToast(null), 2500);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [filteredClaims, selectedClaimId, selectedClaim, onSelectClaimId, onUpdateClaimStatus]);
+
+  // Send Verified Reply with GoBD Audit Record
+  const handleSendVerifiedReply = () => {
+    if (!selectedClaim) return;
+    const replyContent = selectedAssessment?.evaluations[0]?.correctedDraft || selectedDraft?.draft_text || 'Your storm damage report has been registered under Munich catastrophe protocol.';
+    if (onSendMessage) {
+      onSendMessage(selectedClaim.claim_id, replyContent, selectedClaim.channel || 'email');
+    }
+    onUpdateClaimStatus(selectedClaim.claim_id, 'in_review', `Verified response dispatched via ${selectedClaim.channel || 'email'}`);
+    setActionFeedbackToast(`Verified response dispatched to ${selectedClaim.reported_name || 'Policyholder'} via ${selectedClaim.channel || 'Email'}`);
+    setTimeout(() => setActionFeedbackToast(null), 3000);
+  };
+
+  // Send Custom Reply in Messages Tab
+  const handleSendCustomReply = () => {
+    if (!selectedClaim || !customReplyText.trim()) return;
+    if (onSendMessage) {
+      onSendMessage(selectedClaim.claim_id, customReplyText.trim(), selectedClaim.channel || 'email');
+    }
+    setCustomReplyText('');
+    setActionFeedbackToast(`Outgoing message dispatched to ${selectedClaim.reported_name || 'Customer'}`);
+    setTimeout(() => setActionFeedbackToast(null), 2500);
   };
 
   const resetAllFilters = () => {
@@ -326,6 +406,47 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
 
         </div>
 
+      </div>
+
+      {/* Action Toast Feedback Banner */}
+      {actionFeedbackToast && (
+        <div className="bg-emerald-50 border border-emerald-300 text-emerald-900 px-4 py-2.5 rounded-xl shadow-xs text-xs font-semibold flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span>{actionFeedbackToast}</span>
+          </div>
+          <span className="text-[10px] text-emerald-700 font-mono font-bold uppercase">GoBD Timestamped</span>
+        </div>
+      )}
+
+      {/* Rapid Triage Keyboard Shortcut Helper Bar */}
+      <div className="bg-white border border-gray-200/80 rounded-xl px-4 py-2 flex items-center justify-between text-[11px] text-gray-500 shadow-2xs">
+        <div className="flex items-center space-x-3 overflow-x-auto">
+          <span className="font-bold text-gray-700 flex items-center space-x-1 whitespace-nowrap">
+            <span>⚡ Rapid Triage Hotkeys:</span>
+          </span>
+          <span className="flex items-center space-x-1 whitespace-nowrap">
+            <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded font-mono text-[10px] text-gray-800 font-bold">J</kbd>
+            <span>Next</span>
+          </span>
+          <span className="flex items-center space-x-1 whitespace-nowrap">
+            <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded font-mono text-[10px] text-gray-800 font-bold">K</kbd>
+            <span>Prev</span>
+          </span>
+          <span className="flex items-center space-x-1 whitespace-nowrap">
+            <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded font-mono text-[10px] text-gray-800 font-bold">A</kbd>
+            <span>Approve</span>
+          </span>
+          <span className="flex items-center space-x-1 whitespace-nowrap">
+            <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded font-mono text-[10px] text-gray-800 font-bold">E</kbd>
+            <span>Escalate</span>
+          </span>
+          <span className="flex items-center space-x-1 whitespace-nowrap">
+            <kbd className="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded font-mono text-[10px] text-gray-800 font-bold">C</kbd>
+            <span>Close / Reopen</span>
+          </span>
+        </div>
+        <span className="text-[10px] text-gray-400 font-mono hidden md:inline">Desk #4 Munich</span>
       </div>
 
       {/* 2. SPLIT CASE VIEW: LIST ON LEFT, DETAIL INSPECTOR ON RIGHT */}
@@ -709,20 +830,69 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
                       </div>
                     )}
 
-                    {/* Messages */}
-                    {selectedMessages.map((m, idx) => (
-                      <div key={idx} className="p-3 bg-white border border-gray-200 rounded-xl space-y-1 text-xs shadow-2xs">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-gray-900 flex items-center space-x-1.5">
-                            {m.channel === 'email' ? <Mail className="w-3.5 h-3.5 text-integral-copper-600" /> : <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />}
-                            <span>{m.author} ({m.channel})</span>
-                          </span>
-                          <span className="text-gray-400 font-mono">{m.sent_at}</span>
-                        </div>
-                        {m.subject && <div className="font-bold text-gray-950">{m.subject}</div>}
-                        <div className="text-gray-700 whitespace-pre-wrap">{m.body}</div>
-                      </div>
-                    ))}
+                    {/* Messages Thread */}
+                    <div className="space-y-2">
+                      {selectedMessages.map((m, idx) => {
+                        const isOutgoing = m.direction === 'outgoing' || m.sender_type === 'handler' || (m.author && m.author.includes('Lena'));
+                        
+                        return (
+                          <div 
+                            key={idx} 
+                            className={`p-3 rounded-xl space-y-1 text-xs shadow-2xs border ${
+                              isOutgoing 
+                                ? 'bg-orange-50/70 border-orange-200 ml-6 text-gray-900' 
+                                : 'bg-white border-gray-200 mr-6 text-gray-800'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold flex items-center space-x-1.5">
+                                {m.channel === 'email' ? <Mail className="w-3.5 h-3.5 text-integral-copper-600" /> : <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />}
+                                <span className={isOutgoing ? 'text-integral-copper-700' : 'text-gray-950'}>
+                                  {m.author || m.sender_name || 'Customer'}
+                                </span>
+                              </span>
+                              <span className="text-gray-400 font-mono text-[11px]">{m.sent_at || m.timestamp}</span>
+                            </div>
+                            {m.subject && <div className="font-bold text-gray-950">{m.subject}</div>}
+                            <div className="whitespace-pre-wrap leading-relaxed">{m.body || m.content}</div>
+                            {m.delivery_status && (
+                              <div className="text-[10px] text-emerald-700 font-semibold flex items-center space-x-1 pt-1 border-t border-orange-200/50 mt-1">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                <span>{m.delivery_status} · Logged to GoBD Audit</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Quick Reply Composer */}
+                    <div className="pt-3 border-t border-gray-200 flex items-center space-x-2">
+                      <input
+                        type="text"
+                        placeholder={`Write reply to ${selectedClaim.reported_name || 'policyholder'}...`}
+                        value={customReplyText}
+                        onChange={(e) => setCustomReplyText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && customReplyText.trim()) {
+                            handleSendCustomReply();
+                          }
+                        }}
+                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-900 focus:bg-white focus:outline-none focus:border-integral-copper-500 shadow-2xs"
+                      />
+                      <button
+                        onClick={handleSendCustomReply}
+                        disabled={!customReplyText.trim()}
+                        className={`px-3.5 py-2 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center space-x-1 shrink-0 ${
+                          customReplyText.trim()
+                            ? 'bg-integral-copper-600 hover:bg-integral-copper-700 text-white'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        }`}
+                      >
+                        <Send className="w-3 h-3" />
+                        <span>Send</span>
+                      </button>
+                    </div>
 
                   </div>
                 )}
@@ -738,27 +908,46 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
                 <div className="flex items-center space-x-2">
                   {selectedClaim.claim_id === 'KS-26-104234' && (
                     <button
-                      onClick={() => onUpdateClaimStatus(selectedClaim.claim_id, 'approved', 'Autohaus Brandl Freigabe approved before 12:00 PM')}
-                      className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-xs transition flex items-center space-x-1"
+                      onClick={() => {
+                        const newStatus = selectedClaim.status === 'approved' ? 'new' : 'approved';
+                        onUpdateClaimStatus(selectedClaim.claim_id, newStatus, newStatus === 'approved' ? 'Autohaus Brandl Freigabe approved before 12:00 PM' : undefined);
+                        setActionFeedbackToast(`Autohaus Brandl ${newStatus === 'approved' ? 'Approved (€3,860)' : 'Reverted to Pending'}`);
+                        setTimeout(() => setActionFeedbackToast(null), 2500);
+                      }}
+                      className={`px-3.5 py-2 text-xs font-semibold rounded-lg shadow-xs transition flex items-center space-x-1 ${
+                        selectedClaim.status === 'approved'
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
+                          : 'bg-amber-600 hover:bg-amber-700 text-white'
+                      }`}
                     >
                       <CheckCircle2 className="w-4 h-4" />
-                      <span>Approve (€3,860 net)</span>
+                      <span>{selectedClaim.status === 'approved' ? 'Approved · Undo' : 'Approve (€3,860 net)'}</span>
                     </button>
                   )}
 
                   {selectedClaim.claim_id === 'KS-26-104413' && (
                     <button
-                      onClick={() => onUpdateClaimStatus(selectedClaim.claim_id, 'in_review', 'Escalated to Team Lead for rental overage')}
-                      className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg shadow-xs transition flex items-center space-x-1"
+                      onClick={() => {
+                        const newStatus = selectedClaim.status === 'in_review' ? 'new' : 'in_review';
+                        onUpdateClaimStatus(selectedClaim.claim_id, newStatus, newStatus === 'in_review' ? 'Escalated to Team Lead for rental overage' : undefined);
+                        setActionFeedbackToast(`Tom Clarke ${newStatus === 'in_review' ? 'Escalated to Team Lead' : 'Reverted to Pending'}`);
+                        setTimeout(() => setActionFeedbackToast(null), 2500);
+                      }}
+                      className={`px-3.5 py-2 text-xs font-semibold rounded-lg shadow-xs transition flex items-center space-x-1 ${
+                        selectedClaim.status === 'in_review'
+                          ? 'bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100'
+                          : 'bg-rose-600 hover:bg-rose-700 text-white'
+                      }`}
                     >
                       <ShieldAlert className="w-4 h-4" />
-                      <span>Escalate to Lead</span>
+                      <span>{selectedClaim.status === 'in_review' ? 'Escalated · Undo' : 'Escalate to Lead'}</span>
                     </button>
                   )}
 
                   <button
-                    onClick={() => onUpdateClaimStatus(selectedClaim.claim_id, 'in_review', 'Sent corrected rule-engine reply')}
-                    className="px-3.5 py-2 bg-integral-copper-600 hover:bg-integral-copper-700 text-white text-xs font-semibold rounded-lg shadow-xs transition flex items-center space-x-1"
+                    onClick={handleSendVerifiedReply}
+                    className="px-3.5 py-2 bg-integral-copper-600 hover:bg-integral-copper-700 text-white text-xs font-semibold rounded-lg shadow-xs transition flex items-center space-x-1.5"
+                    title="Send GoBD compliant verified response"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>Send Verified Reply</span>

@@ -18,8 +18,8 @@ export default function Home() {
 
   // Master Claims & Policies State
   const [claims, setClaims] = useState<Claim[]>(seedData.claims as unknown as Claim[]);
+  const [messages, setMessages] = useState<any[]>(seedData.messages as any[]);
   const policies = useMemo(() => seedData.policies as unknown as Policy[], []);
-  const messages = useMemo(() => seedData.messages as any[], []);
   const attachments = useMemo(() => seedData.attachments as any[], []);
   const aiDrafts = useMemo(() => seedData.ai_drafts as any[], []);
   const voiceCalls = useMemo(() => seedData.voice_calls as any[], []);
@@ -37,6 +37,42 @@ export default function Home() {
   const [isDuplicatesMerged, setIsDuplicatesMerged] = useState(false);
   const [isGlassDispatched, setIsGlassDispatched] = useState(false);
   const [isDekraDispatched, setIsDekraDispatched] = useState(false);
+
+  // Hydrate state from localStorage on browser mount
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem('kumulus_claims_cockpit_v2');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.claims && Array.isArray(parsed.claims)) setClaims(parsed.claims);
+        if (parsed.messages && Array.isArray(parsed.messages)) setMessages(parsed.messages);
+        if (parsed.isAutohausApproved !== undefined) setIsAutohausApproved(parsed.isAutohausApproved);
+        if (parsed.isTomClarkeEscalated !== undefined) setIsTomClarkeEscalated(parsed.isTomClarkeEscalated);
+        if (parsed.isHaftpflichtQuarantined !== undefined) setIsHaftpflichtQuarantined(parsed.isHaftpflichtQuarantined);
+        if (parsed.isDuplicatesMerged !== undefined) setIsDuplicatesMerged(parsed.isDuplicatesMerged);
+        if (parsed.isGlassDispatched !== undefined) setIsGlassDispatched(parsed.isGlassDispatched);
+        if (parsed.isDekraDispatched !== undefined) setIsDekraDispatched(parsed.isDekraDispatched);
+      }
+    } catch (e) {
+      console.error('LocalStorage hydration error:', e);
+    }
+  }, []);
+
+  // Persist modifications to localStorage
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('kumulus_claims_cockpit_v2', JSON.stringify({
+        claims,
+        messages,
+        isAutohausApproved,
+        isTomClarkeEscalated,
+        isHaftpflichtQuarantined,
+        isDuplicatesMerged,
+        isGlassDispatched,
+        isDekraDispatched
+      }));
+    } catch (e) {}
+  }, [claims, messages, isAutohausApproved, isTomClarkeEscalated, isHaftpflichtQuarantined, isDuplicatesMerged, isGlassDispatched, isDekraDispatched]);
 
   // Policy map lookup
   const policyMap = useMemo(() => {
@@ -183,7 +219,11 @@ export default function Home() {
 
   // Revert / Reset Entire State back to 08:00 AM Morning Condition
   const handleResetAllState = () => {
+    try {
+      localStorage.removeItem('kumulus_claims_cockpit_v2');
+    } catch (e) {}
     setClaims(seedData.claims as unknown as Claim[]);
+    setMessages(seedData.messages as any[]);
     setIsAutohausApproved(false);
     setIsTomClarkeEscalated(false);
     setIsHaftpflichtQuarantined(false);
@@ -191,6 +231,26 @@ export default function Home() {
     setIsGlassDispatched(false);
     setIsDekraDispatched(false);
     setSelectedClaimId('KS-26-104234');
+  };
+
+  // Dispatch outgoing message and log into claim conversation
+  const handleSendMessage = (claimId: string, content: string, channel: string = 'email') => {
+    const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    const newMsg = {
+      message_id: `msg-live-${Date.now()}`,
+      claim_id: claimId,
+      direction: 'outgoing',
+      channel: channel,
+      author: 'Lena Huber (Senior Adjuster)',
+      sender_name: 'Lena Huber (Desk #4)',
+      sender_type: 'handler',
+      sent_at: `${timeStr} CEST`,
+      timestamp: `${timeStr} CEST`,
+      content: content,
+      body: content,
+      delivery_status: 'Delivered',
+    };
+    setMessages(prev => [...prev, newMsg]);
   };
 
   // Track if any modification has been made
@@ -348,6 +408,7 @@ export default function Home() {
                 selectedClaimId={selectedClaimId}
                 onSelectClaimId={setSelectedClaimId}
                 onUpdateClaimStatus={handleUpdateClaimStatus}
+                onSendMessage={handleSendMessage}
                 initialFilter={initialCaseFilter}
               />
             </div>
