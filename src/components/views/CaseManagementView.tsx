@@ -1292,32 +1292,164 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
                       })}
                     </div>
 
-                    {/* Quick Reply Composer */}
-                    <div className="pt-3 border-t border-gray-200 flex items-center space-x-2">
-                      <input
-                        type="text"
-                        placeholder={`Write reply to ${selectedClaim.reported_name || 'policyholder'}...`}
-                        value={customReplyText}
-                        onChange={(e) => setCustomReplyText(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && customReplyText.trim()) {
-                            handleSendCustomReply();
-                          }
-                        }}
-                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-900 focus:bg-white focus:outline-none focus:border-integral-copper-500 shadow-2xs"
-                      />
-                      <button
-                        onClick={handleSendCustomReply}
-                        disabled={!customReplyText.trim()}
-                        className={`px-3.5 py-2 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center space-x-1 shrink-0 ${
-                          customReplyText.trim()
-                            ? 'bg-integral-copper-600 hover:bg-integral-copper-700 text-white'
-                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        }`}
-                      >
-                        <Send className="w-3 h-3" />
-                        <span>Send</span>
-                      </button>
+                    {/* Bilingual Quick Insert Chips & Composer */}
+                    <div className="pt-3 border-t border-gray-200 space-y-2">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="font-semibold text-gray-700 flex items-center space-x-1">
+                          <span>Bilingual Fast Response (DE + EN below)</span>
+                        </span>
+                        <span className="text-gray-400 font-mono text-[10px]">German official · English translated below</span>
+                      </div>
+
+                      {/* Quick Template Chips */}
+                      <div className="flex flex-wrap gap-1.5 pb-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCustomReplyText(
+`Guten Tag ${selectedClaim.holder_name || selectedClaim.reported_name || 'Versicherungsnehmer/in'},
+
+wir haben Ihre Schadenmeldung erhalten. Da Ihr Fahrzeug (${selectedClaim.reported_plate || ''}) Glasschäden aufweist, ist es nicht verkehrssicher. Bitte buchen Sie den mobilen Vor-Ort-Austausch über unseren Partner Klarsicht Autoglas:
+
+👉 https://partner.klarsicht-autoglas.de/book?claim=${selectedClaim.claim_id}&deductible=150
+
+Ihre Teilkasko-Selbstbeteiligung beträgt 150 €.
+
+Mit freundlichen Grüßen
+Lena Huber · Kumulus Schaden
+
+---
+[English version below / Englische Fassung siehe unten]
+
+Dear ${selectedClaim.holder_name || selectedClaim.reported_name || 'Customer'},
+
+We have received your hail claim. Because your vehicle has broken glass, it is not roadworthy under StVZO rules. Please book priority on-site mobile glass replacement with partner Klarsicht Autoglas:
+
+👉 https://partner.klarsicht-autoglas.de/book?claim=${selectedClaim.claim_id}&deductible=150
+
+Your Teilkasko deductible is €150.
+
+Kind regards,
+Lena Huber · Kumulus Claims`
+                            );
+                          }}
+                          className="px-2 py-0.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-medium rounded border border-emerald-200 transition"
+                        >
+                          + [DE/EN] Klarsicht Glas
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCustomReplyText(
+`Guten Tag ${selectedClaim.holder_name || selectedClaim.reported_name || 'Versicherungsnehmer/in'},
+
+vielen Dank für Ihre Schadenmeldung. Der Hagelschaden ist über Ihre Teilkasko versichert. Für eine schnelle Begutachtung wählen Sie bitte Ihren 15-Minuten-Termin im Dekra Drive-In Prüfzentrum München:
+
+👉 https://dekra-termine.de/kumulus-muenchen?claim=${selectedClaim.claim_id}
+
+Mit freundlichen Grüßen
+Lena Huber · Kumulus Schaden
+
+---
+[English version below / Englische Fassung siehe unten]
+
+Dear ${selectedClaim.holder_name || selectedClaim.reported_name || 'Customer'},
+
+Thank you for reporting your hail damage. This is covered under your Teilkasko. For prompt appraisal without delays, please select your 15-minute slot at the Dekra Drive-In Hub Munich:
+
+👉 https://dekra-termine.de/kumulus-muenchen?claim=${selectedClaim.claim_id}
+
+Kind regards,
+Lena Huber · Kumulus Claims`
+                            );
+                          }}
+                          className="px-2 py-0.5 bg-sky-50 hover:bg-sky-100 text-sky-800 text-[11px] font-medium rounded border border-sky-200 transition"
+                        >
+                          + [DE/EN] Dekra Sammeltermin
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCustomReplyText(
+`Guten Tag ${selectedClaim.holder_name || selectedClaim.reported_name || 'Versicherungsnehmer/in'},
+
+vielen Dank für Ihre Meldung. Ich habe Ihren Vertrag geprüft: Ihre Kfz-Haftpflichtversicherung deckt ausschließlich Schäden an fremden Fahrzeugen ab. Eigenschäden durch Hagel erfordern eine Teilkaskoversicherung.
+
+Aus diesem Grund können wir die Reparaturkosten leider nicht übernehmen.
+
+Mit freundlichen Grüßen
+Lena Huber · Kumulus Schaden
+
+---
+[English version below / Englische Fassung siehe unten]
+
+Dear ${selectedClaim.holder_name || selectedClaim.reported_name || 'Customer'},
+
+Thank you for contacting us. I have reviewed your policy: third-party liability (Haftpflicht) only covers damage caused to other parties. Storm damage to your own vehicle requires Teilkasko cover.
+
+For this reason, we cannot cover these repair costs.
+
+Kind regards,
+Lena Huber · Kumulus Claims`
+                            );
+                          }}
+                          className="px-2 py-0.5 bg-rose-50 hover:bg-rose-100 text-rose-800 text-[11px] font-medium rounded border border-rose-200 transition"
+                        >
+                          + [DE/EN] Ablehnung Haftpflicht
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setCustomReplyText(
+`Sehr geehrte Damen und Herren,
+
+hiermit bestätigen wir die offizielle Reparaturfreigabe für Schadennummer ${selectedClaim.claim_id} gemäß geprüftem Kostenvoranschlag.
+
+Mit freundlichen Grüßen
+Lena Huber · Kumulus Schaden
+
+---
+[English version below / Englische Fassung siehe unten]
+
+Dear Sir or Madam,
+
+We hereby grant formal repair authorization for claim ${selectedClaim.claim_id} in accordance with the verified estimate.
+
+Best regards,
+Lena Huber · Kumulus Claims`
+                            );
+                          }}
+                          className="px-2 py-0.5 bg-amber-50 hover:bg-amber-100 text-amber-800 text-[11px] font-medium rounded border border-amber-200 transition"
+                        >
+                          + [DE/EN] Freigabe
+                        </button>
+                      </div>
+
+                      {/* Textarea Composer */}
+                      <div className="flex items-start space-x-2">
+                        <textarea
+                          rows={3}
+                          placeholder={`Write bilingual reply to ${selectedClaim.reported_name || 'policyholder'} in German (with English version below)...`}
+                          value={customReplyText}
+                          onChange={(e) => setCustomReplyText(e.target.value)}
+                          className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-2.5 text-xs text-gray-900 focus:bg-white focus:outline-none focus:border-integral-copper-500 shadow-2xs font-mono"
+                        />
+                        <button
+                          onClick={handleSendCustomReply}
+                          disabled={!customReplyText.trim()}
+                          className={`px-3.5 py-2.5 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center space-x-1 shrink-0 ${
+                            customReplyText.trim()
+                              ? 'bg-integral-copper-600 hover:bg-integral-copper-700 text-white'
+                              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                          }`}
+                        >
+                          <Send className="w-3.5 h-3.5" />
+                          <span>Dispatch</span>
+                        </button>
+                      </div>
                     </div>
 
                   </div>

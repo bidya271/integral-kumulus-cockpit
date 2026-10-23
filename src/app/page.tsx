@@ -249,8 +249,9 @@ export default function Home() {
       const interpolated = templateBody
         .replace(/\{\{customer_name\}\}/g, customerName)
         .replace(/\{\{claim_id\}\}/g, claimId)
+        .replace(/\{\{policy_id\}\}/g, claim?.resolved_policy_id || policy?.policy_id || 'KV-XXXXXXX')
         .replace(/\{\{plate\}\}/g, plate)
-        .replace(/\{\{deductible\}\}/g, deductible.toString())
+        .replace(/\{\{deductible\}\}/g, `€${deductible}`)
         .replace(/\{\{handler_name\}\}/g, 'Lena Huber');
 
       return {

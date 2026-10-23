@@ -109,19 +109,19 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = ({
   }> = {
     glass: {
       title: 'Broken Glass & Roadworthiness Emergency',
-      subtitle: 'Dispatch on-site mobile booking links to partner Klarsicht Autoglas',
+      subtitle: 'Dispatch on-site mobile booking links to partner Klarsicht Autoglas (DE + EN)',
       icon: Send,
       ruleCode: 'RULE_5_GLASS_EMERGENCY',
       ruleName: 'Rule 5: Glass Damage & Roadworthiness',
       badgeStyle: 'bg-emerald-100 text-emerald-900 border-emerald-300',
-      subject: 'Kumulus Schaden {{claim_id}} · Wichtige Information: Vor-Ort-Reparatur Klarsicht Autoglas',
+      subject: 'Kumulus Schaden {{claim_id}} · Vor-Ort-Reparatur Klarsicht Autoglas / Mobile Glass Repair',
       body: `Guten Tag {{customer_name}},
 
 wir haben Ihre Schadenmeldung zum Hagelunwetter in München erhalten. 
 
 Da Ihr Fahrzeug ({{plate}}) Schäden an der Verglasung aufweist, ist es gemäß Sicherheitsrichtlinien und StVZO vorübergehend nicht verkehrssicher. Bitte fahren Sie das Fahrzeug nicht selbst in eine Werkstatt.
 
-Um die Reparatur schnellstmöglich durchzuführen, haben wir für Sie unseren mobilen Partner Klarsicht Autoglas beauftragt. Ein Techniker repariert Ihr Fahrzeug direkt vor Ort an Ihrer Adresse:
+Um die Reparatur schnellstmöglich durchzuführen, haben wir für Sie unseren mobilen Partner Klarsicht Autoglas beauftragt. Ein Servicetechniker repariert Ihr Fahrzeug direkt vor Ort an Ihrer Adresse:
 
 👉 https://partner.klarsicht-autoglas.de/book?claim={{claim_id}}&deductible={{deductible}}
 
@@ -129,17 +129,36 @@ Für diesen Schaden gilt Ihre vereinbarte Teilkasko-Selbstbeteiligung von {{dedu
 
 Mit freundlichen Grüßen
 Lena Huber
-Kumulus Versicherungs AG · Schaden-Direktion München`,
+Kumulus Versicherungs AG · Schaden-Direktion München
+
+---
+[English version below / Englische Fassung siehe unten]
+
+Dear {{customer_name}},
+
+We have received your claim report regarding the Munich hailstorm.
+
+Because your vehicle ({{plate}}) has glass damage, it is temporarily not roadworthy under StVZO traffic safety regulations. Please do not drive the vehicle to a repair shop.
+
+To resolve your repair as quickly as possible, we have commissioned our mobile partner Klarsicht Autoglas. A certified mobile technician will repair or replace your vehicle's glass directly on-site at your home or work address:
+
+👉 https://partner.klarsicht-autoglas.de/book?claim={{claim_id}}&deductible={{deductible}}
+
+Your agreed Teilkasko comprehensive deductible of {{deductible}} applies. Invoicing will be settled directly between Klarsicht and Kumulus.
+
+Kind regards,
+Lena Huber
+Kumulus Versicherungs AG · Munich Claims Directorate`,
       sampleClaimId: 'KS-26-104250'
     },
     haftpflicht: {
       title: 'Haftpflicht Storm Hazard Quarantine',
-      subtitle: 'Halt false AI coverage promises and send legally sound exclusion notices',
+      subtitle: 'Halt false AI coverage promises and send legally sound exclusion notices (DE + EN)',
       icon: ShieldAlert,
       ruleCode: 'RULE_1_HAFTPFLICHT_HAZARD',
       ruleName: 'Rule 1: Coverage Verification (Haftpflicht)',
       badgeStyle: 'bg-rose-100 text-rose-900 border-rose-300',
-      subject: 'Kumulus Schaden {{claim_id}} · Ihre Schadenmeldung vom 14. Juli 2026',
+      subject: 'Kumulus Schaden {{claim_id}} · Ihre Schadenmeldung vom 14. Juli 2026 / Claim Notice',
       body: `Guten Tag {{customer_name}},
 
 vielen Dank für Ihre Kontaktaufnahme bezüglich des gestrigen Hagelereignisses. 
@@ -152,38 +171,70 @@ Aus diesem Grund können wir die Reparaturkosten bedauerlicherweise nicht übern
 
 Mit freundlichen Grüßen
 Lena Huber
-Kumulus Versicherungs AG · Schaden-Direktion München`,
+Kumulus Versicherungs AG · Schaden-Direktion München
+
+---
+[English version below / Englische Fassung siehe unten]
+
+Dear {{customer_name}},
+
+Thank you for contacting us regarding yesterday's hailstorm event in Munich.
+
+I have thoroughly reviewed your policy ({{policy_id}}) for vehicle {{plate}}. Your coverage currently consists of third-party motor liability (Kfz-Haftpflicht) only.
+
+Under German insurance law, liability insurance covers damage caused to other parties. Damage to your own vehicle caused by storm or weather hazards (such as hail) requires partial comprehensive cover (Teilkasko), which has not been contracted for this vehicle.
+
+For this reason, we regrettably cannot cover the repair costs. Please reach out if you have any questions or wish to explore comprehensive coverage options for the future.
+
+Kind regards,
+Lena Huber
+Kumulus Versicherungs AG · Munich Claims Directorate`,
       sampleClaimId: 'KS-26-104289'
     },
     duplicates: {
       title: 'Multi-Channel Duplicate Consolidation',
-      subtitle: 'Merge redundant WhatsApp/App filings and suppress duplicate notifications',
+      subtitle: 'Merge redundant WhatsApp/App filings and suppress duplicate notifications (DE + EN)',
       icon: Users,
       ruleCode: 'RULE_4_DUPLICATE_MERGE',
       ruleName: 'Rule 4: Multi-Channel Deduplication',
       badgeStyle: 'bg-indigo-100 text-indigo-900 border-indigo-300',
-      subject: 'Kumulus Schaden {{claim_id}} · Konsolidierung Ihrer Schadenmeldung',
+      subject: 'Kumulus Schaden {{claim_id}} · Konsolidierung Ihrer Schadenmeldung / Submission Merged',
       body: `Guten Tag {{customer_name}},
 
 wir bestätigen den Eingang Ihrer weiteren Mitteilung zum Hagelschaden an Ihrem Fahrzeug {{plate}}. 
 
-Ihr Vorgang wurde bereits unter dem Aktenzeichen {{claim_id}} erfasst und wird von mir persönlich bearbeitet. Um Mehrfachanfragen zu vermeiden, haben wir Ihre parallelen Eingaben gebündelt. 
+Ihr Vorgang wurde bereits unter dem Aktenzeichen {{claim_id}} erfasst und wird von mir persönlich bearbeitet. Um Mehrfachanfragen zu vermeiden und die Bearbeitung zu beschleunigen, haben wir Ihre parallelen Meldungen gebündelt. 
 
 Sie erhalten alle Updates und Termine zentral über diesen Nachrichtenkanal. Sie müssen keine weiteren Meldungen einreichen.
 
 Mit freundlichen Grüßen
 Lena Huber
-Kumulus Versicherungs AG · Schaden-Direktion München`,
+Kumulus Versicherungs AG · Schaden-Direktion München
+
+---
+[English version below / Englische Fassung siehe unten]
+
+Dear {{customer_name}},
+
+We acknowledge receipt of your additional communication regarding hail damage to your vehicle {{plate}}.
+
+Your claim has already been registered under file reference {{claim_id}} and is being processed personally by our team. To prevent redundant inquiries and accelerate handling, we have consolidated your parallel submissions into this primary dossier.
+
+You will receive all updates and appointment confirmations centrally through this channel. No further submissions are needed on your end.
+
+Kind regards,
+Lena Huber
+Kumulus Versicherungs AG · Munich Claims Directorate`,
       sampleClaimId: 'KS-26-104300'
     },
     dekra: {
       title: 'Dekra Drive-In Mass Assessment Hub',
-      subtitle: 'Schedule drivable vehicles with body dents into Munich Olympia-Park',
+      subtitle: 'Schedule drivable vehicles with body dents into Munich Olympia-Park (DE + EN)',
       icon: CheckSquare,
       ruleCode: 'RULE_6_DEKRA_MASS_ASSESSMENT',
       ruleName: 'Rule 6: Mass Hail Assessment (Sammelbesichtigung)',
       badgeStyle: 'bg-sky-100 text-sky-900 border-sky-300',
-      subject: 'Kumulus Schaden {{claim_id}} · Einladung zur Dekra Sammelbesichtigung München',
+      subject: 'Kumulus Schaden {{claim_id}} · Einladung zur Dekra Sammelbesichtigung / Drive-In Assessment',
       body: `Guten Tag {{customer_name}},
 
 vielen Dank für Ihre Schadenmeldung. Der Hagelschaden an Ihrem fahrbereiten Fahrzeug {{plate}} ist über Ihre Teilkasko (Selbstbeteiligung: {{deductible}}) versichert.
@@ -192,11 +243,28 @@ Um eine Begutachtung ohne wochenlange Werkstattwartezeiten zu gewährleisten, ha
 
 👉 https://dekra-termine.de/kumulus-muenchen?claim={{claim_id}}
 
-Ein Dekra-Sachverständiger vermisst die Hageldellen per Scanner vor Ort, und wir erstellen direkt Ihr Schadengutachten.
+Ein Dekra-Sachverständiger vermisst die Hageldellen per 3D-Scanner vor Ort, und wir erstellen direkt Ihr Schadengutachten zur Freigabe.
 
 Mit freundlichen Grüßen
 Lena Huber
-Kumulus Versicherungs AG · Schaden-Direktion München`,
+Kumulus Versicherungs AG · Schaden-Direktion München
+
+---
+[English version below / Englische Fassung siehe unten]
+
+Dear {{customer_name}},
+
+Thank you for submitting your hail damage report. The storm damage to your drivable vehicle {{plate}} is covered under your Teilkasko policy (deductible: {{deductible}}).
+
+To provide an expert appraisal without weeks of workshop waiting times, Kumulus and Dekra have established a central Drive-In Hail Assessment Hub at Munich Olympic Park. Please select your personal 15-minute appointment slot:
+
+👉 https://dekra-termine.de/kumulus-muenchen?claim={{claim_id}}
+
+A certified Dekra expert will measure the hail dents on-site using automated 3D scanners, and we will issue your formal appraisal and repair authorization on the spot.
+
+Kind regards,
+Lena Huber
+Kumulus Versicherungs AG · Munich Claims Directorate`,
       sampleClaimId: 'KS-26-104320'
     }
   };
@@ -326,12 +394,12 @@ Kumulus Versicherungs AG · Schaden-Direktion München`,
             <div className="space-y-1">
               <div className="flex items-center justify-between text-[11px]">
                 <label className="font-bold uppercase tracking-wider text-gray-600">
-                  Templatized Outbound Message (Dynamic Placeholders):
+                  Bilingual Outbound Message (German + English below):
                 </label>
-                <span className="text-gray-400 font-mono">Variables: {"{{customer_name}}, {{plate}}, {{deductible}}"}</span>
+                <span className="text-gray-400 font-mono text-[10px]">Variables: {"{{customer_name}}, {{plate}}, {{deductible}}, {{policy_id}}"}</span>
               </div>
               <textarea
-                rows={9}
+                rows={12}
                 value={editedBody}
                 onChange={(e) => setEditedBody(e.target.value)}
                 className="w-full bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs text-gray-900 font-mono leading-relaxed focus:bg-white focus:outline-none focus:border-integral-copper-500"
