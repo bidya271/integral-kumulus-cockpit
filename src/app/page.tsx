@@ -94,49 +94,115 @@ export default function Home() {
     return count;
   }, [isAutohausApproved, isTomClarkeEscalated]);
 
-  // Handlers for Batch Actions
+  // Handlers for Batch Actions (Fully Reversible / Toggleable)
   const handleApproveAutohaus = () => {
-    setIsAutohausApproved(true);
-    setClaims(prev => prev.map(c => 
-      c.claim_id === 'KS-26-104234' ? { ...c, status: 'approved', notes: 'KVA €3,860 verified <= Dekra €3,910. Approved slot 13:00.' } : c
-    ));
+    if (isAutohausApproved) {
+      setIsAutohausApproved(false);
+      setClaims(prev => prev.map(c => 
+        c.claim_id === 'KS-26-104234' ? { ...c, status: 'new', notes: undefined } : c
+      ));
+    } else {
+      setIsAutohausApproved(true);
+      setClaims(prev => prev.map(c => 
+        c.claim_id === 'KS-26-104234' ? { ...c, status: 'approved', notes: 'KVA €3,860 verified <= Dekra €3,910. Approved slot 13:00.' } : c
+      ));
+    }
   };
 
   const handleEscalateTomClarke = () => {
-    setIsTomClarkeEscalated(true);
-    setClaims(prev => prev.map(c => 
-      c.claim_id === 'KS-26-104413' ? { ...c, status: 'in_review', notes: 'Escalated to Team Lead: Requested 21-day rental exceeds 14-day limit.' } : c
-    ));
+    if (isTomClarkeEscalated) {
+      setIsTomClarkeEscalated(false);
+      setClaims(prev => prev.map(c => 
+        c.claim_id === 'KS-26-104413' ? { ...c, status: 'new', notes: undefined } : c
+      ));
+    } else {
+      setIsTomClarkeEscalated(true);
+      setClaims(prev => prev.map(c => 
+        c.claim_id === 'KS-26-104413' ? { ...c, status: 'in_review', notes: 'Escalated to Team Lead: Requested 21-day rental exceeds 14-day limit.' } : c
+      ));
+    }
   };
 
   const handleQuarantineHaftpflicht = () => {
-    setIsHaftpflichtQuarantined(true);
-    setClaims(prev => prev.map(c => {
-      if (c.policy_coverage === 'Haftpflicht' && c.is_storm_claim) {
-        return { ...c, status: 'in_review', notes: 'Quarantined: Haftpflicht excludes hail storm damage (€4k leakage prevented).' };
-      }
-      return c;
-    }));
+    if (isHaftpflichtQuarantined) {
+      setIsHaftpflichtQuarantined(false);
+      setClaims(prev => prev.map(c => {
+        if (c.policy_coverage === 'Haftpflicht' && c.is_storm_claim) {
+          return { ...c, status: 'new', notes: undefined };
+        }
+        return c;
+      }));
+    } else {
+      setIsHaftpflichtQuarantined(true);
+      setClaims(prev => prev.map(c => {
+        if (c.policy_coverage === 'Haftpflicht' && c.is_storm_claim) {
+          return { ...c, status: 'in_review', notes: 'Quarantined: Haftpflicht excludes hail storm damage (€4k leakage prevented).' };
+        }
+        return c;
+      }));
+    }
   };
 
   const handleMergeDuplicates = () => {
-    setIsDuplicatesMerged(true);
-    setClaims(prev => prev.map(c => c.is_duplicate ? { ...c, status: 'merged', notes: 'Auto-merged duplicate FNOL record.' } : c));
+    if (isDuplicatesMerged) {
+      setIsDuplicatesMerged(false);
+      setClaims(prev => prev.map(c => c.is_duplicate ? { ...c, status: 'new', notes: undefined } : c));
+    } else {
+      setIsDuplicatesMerged(true);
+      setClaims(prev => prev.map(c => c.is_duplicate ? { ...c, status: 'merged', notes: 'Auto-merged duplicate FNOL record.' } : c));
+    }
   };
 
   const handleDispatchGlass = () => {
-    setIsGlassDispatched(true);
-    setClaims(prev => prev.map(c => 
-      (c.has_glass && c.policy_coverage !== 'Haftpflicht') ? { ...c, notes: 'Dispatched to Klarsicht Autoglas partner on-site service.' } : c
-    ));
+    if (isGlassDispatched) {
+      setIsGlassDispatched(false);
+      setClaims(prev => prev.map(c => 
+        (c.has_glass && c.policy_coverage !== 'Haftpflicht') ? { ...c, notes: undefined } : c
+      ));
+    } else {
+      setIsGlassDispatched(true);
+      setClaims(prev => prev.map(c => 
+        (c.has_glass && c.policy_coverage !== 'Haftpflicht') ? { ...c, notes: 'Dispatched to Klarsicht Autoglas partner on-site service.' } : c
+      ));
+    }
   };
 
   const handleDispatchDekra = () => {
-    setIsDekraDispatched(true);
-    setClaims(prev => prev.map(c => 
-      (c.is_storm_claim && !c.has_glass && c.policy_coverage !== 'Haftpflicht') ? { ...c, notes: 'Dispatched to Munich Olympia-Park Dekra Drive-In mass appraisal hub.' } : c
-    ));
+    if (isDekraDispatched) {
+      setIsDekraDispatched(false);
+      setClaims(prev => prev.map(c => 
+        (c.is_storm_claim && !c.has_glass && c.policy_coverage !== 'Haftpflicht') ? { ...c, notes: undefined } : c
+      ));
+    } else {
+      setIsDekraDispatched(true);
+      setClaims(prev => prev.map(c => 
+        (c.is_storm_claim && !c.has_glass && c.policy_coverage !== 'Haftpflicht') ? { ...c, notes: 'Dispatched to Munich Olympia-Park Dekra Drive-In mass appraisal hub.' } : c
+      ));
+    }
   };
+
+  // Revert / Reset Entire State back to 08:00 AM Morning Condition
+  const handleResetAllState = () => {
+    setClaims(seedData.claims as unknown as Claim[]);
+    setIsAutohausApproved(false);
+    setIsTomClarkeEscalated(false);
+    setIsHaftpflichtQuarantined(false);
+    setIsDuplicatesMerged(false);
+    setIsGlassDispatched(false);
+    setIsDekraDispatched(false);
+    setSelectedClaimId('KS-26-104234');
+  };
+
+  // Track if any modification has been made
+  const hasModifications = useMemo(() => {
+    if (isAutohausApproved || isTomClarkeEscalated || isHaftpflichtQuarantined || isDuplicatesMerged || isGlassDispatched || isDekraDispatched) {
+      return true;
+    }
+    return claims.some((c, idx) => {
+      const orig = (seedData.claims as unknown as Claim[])[idx];
+      return orig && (c.status !== orig.status || c.notes !== orig.notes);
+    });
+  }, [isAutohausApproved, isTomClarkeEscalated, isHaftpflichtQuarantined, isDuplicatesMerged, isGlassDispatched, isDekraDispatched, claims]);
 
   // Lifecycle status update handler for individual claims
   const handleUpdateClaimStatus = (claimId: string, newStatus: string, notes?: string) => {
@@ -238,6 +304,8 @@ export default function Home() {
           onSearchChange={setSearchQuery}
           onExportOpsReport={handleExportOpsReport}
           totalClaimsCount={claims.length}
+          hasModifications={hasModifications}
+          onResetAllState={handleResetAllState}
         />
 
         {/* View Switcher Container */}

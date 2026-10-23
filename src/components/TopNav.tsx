@@ -8,7 +8,8 @@ import {
   Clock, 
   UserCheck, 
   Building2, 
-  SlidersHorizontal 
+  SlidersHorizontal,
+  RotateCcw
 } from 'lucide-react';
 import { NavTab } from './Sidebar';
 
@@ -18,6 +19,8 @@ interface TopNavProps {
   onSearchChange: (q: string) => void;
   onExportOpsReport: () => void;
   totalClaimsCount: number;
+  hasModifications?: boolean;
+  onResetAllState?: () => void;
 }
 
 export const TopNav: React.FC<TopNavProps> = ({
@@ -25,7 +28,9 @@ export const TopNav: React.FC<TopNavProps> = ({
   searchQuery,
   onSearchChange,
   onExportOpsReport,
-  totalClaimsCount
+  totalClaimsCount,
+  hasModifications = false,
+  onResetAllState
 }) => {
   const titles: Record<NavTab, { title: string; subtitle: string }> = {
     dashboard: {
@@ -77,6 +82,25 @@ export const TopNav: React.FC<TopNavProps> = ({
             className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-gray-900 placeholder-gray-400 focus:bg-white focus:outline-none focus:border-integral-copper-500 transition"
           />
         </div>
+
+        {/* Reset to 08:00 AM State (Reversible Action) */}
+        {onResetAllState && (
+          <button
+            onClick={onResetAllState}
+            className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition shadow-2xs ${
+              hasModifications
+                ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300 ring-1 ring-amber-300'
+                : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-200'
+            }`}
+            title="Revert all decisions and restore raw 08:00 AM Munich hailstorm queue"
+          >
+            <RotateCcw className={`w-3.5 h-3.5 ${hasModifications ? 'text-amber-700 animate-spin-reverse' : 'text-gray-500'}`} />
+            <span className="hidden sm:inline">Reset to 08:00 AM</span>
+            {hasModifications && (
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-600 animate-pulse" />
+            )}
+          </button>
+        )}
 
         {/* Export Ops Report */}
         <button

@@ -242,10 +242,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <ArrowRight className="w-3 h-3" />
               </button>
               {isAutohausApproved ? (
-                <span className="text-emerald-700 font-semibold flex items-center space-x-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Approved &amp; Slot Locked</span>
-                </span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-emerald-700 font-semibold flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Approved &amp; Slot Locked</span>
+                  </span>
+                  <button
+                    onClick={onApproveAutohaus}
+                    className="px-2 py-0.5 text-[11px] font-medium text-gray-600 hover:text-gray-950 bg-white border border-gray-200 rounded shadow-2xs hover:bg-gray-50 transition"
+                    title="Undo approval and return to pending"
+                  >
+                    Undo
+                  </button>
+                </div>
               ) : (
                 <button
                   onClick={onApproveAutohaus}
@@ -287,10 +296,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <ArrowRight className="w-3 h-3" />
               </button>
               {isTomClarkeEscalated ? (
-                <span className="text-emerald-700 font-semibold flex items-center space-x-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Escalated to Team Lead</span>
-                </span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-emerald-700 font-semibold flex items-center space-x-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Escalated to Team Lead</span>
+                  </span>
+                  <button
+                    onClick={onEscalateTomClarke}
+                    className="px-2 py-0.5 text-[11px] font-medium text-gray-600 hover:text-gray-950 bg-white border border-gray-200 rounded shadow-2xs hover:bg-gray-50 transition"
+                    title="Undo escalation"
+                  >
+                    Undo
+                  </button>
+                </div>
               ) : (
                 <button
                   onClick={onEscalateTomClarke}
@@ -339,14 +357,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <span className="text-[10px] text-emerald-700 font-mono font-bold">+10.5 hrs</span>
                   <button
                     onClick={onMergeDuplicates}
-                    disabled={isDuplicatesMerged}
-                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition ${
+                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition shadow-2xs ${
                       isDuplicatesMerged
-                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                        : 'bg-integral-copper-600 hover:bg-integral-copper-700 text-white shadow-xs'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
+                        : 'bg-integral-copper-600 hover:bg-integral-copper-700 text-white'
                     }`}
+                    title={isDuplicatesMerged ? 'Click to unmerge and reverse duplicate consolidation' : 'Merge duplicates'}
                   >
-                    {isDuplicatesMerged ? 'Merged (42)' : 'Merge All'}
+                    {isDuplicatesMerged ? 'Merged · Undo' : 'Merge All'}
                   </button>
                 </div>
               </div>
@@ -369,14 +387,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <span className="text-[10px] text-emerald-700 font-mono font-bold">+8.25 hrs</span>
                   <button
                     onClick={onQuarantineHaftpflicht}
-                    disabled={isHaftpflichtQuarantined}
-                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition ${
+                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition shadow-2xs ${
                       isHaftpflichtQuarantined
-                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                        : 'bg-rose-600 hover:bg-rose-700 text-white shadow-xs'
+                        ? 'bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100'
+                        : 'bg-rose-600 hover:bg-rose-700 text-white'
                     }`}
+                    title={isHaftpflichtQuarantined ? 'Click to release quarantine and reverse draft halt' : 'Halt drafts'}
                   >
-                    {isHaftpflichtQuarantined ? 'Quarantined (33)' : 'Halt 33 Drafts'}
+                    {isHaftpflichtQuarantined ? 'Halted · Undo' : 'Halt 33 Drafts'}
                   </button>
                 </div>
               </div>
@@ -399,14 +417,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <span className="text-[10px] text-emerald-700 font-mono font-bold">+19.5 hrs</span>
                   <button
                     onClick={onDispatchGlass}
-                    disabled={isGlassDispatched}
-                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition ${
+                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition shadow-2xs ${
                       isGlassDispatched
-                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                        : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
+                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
                     }`}
+                    title={isGlassDispatched ? 'Click to recall dispatched links' : 'Dispatch links'}
                   >
-                    {isGlassDispatched ? 'Dispatched (117)' : 'Dispatch Links'}
+                    {isGlassDispatched ? 'Dispatched · Undo' : 'Dispatch Links'}
                   </button>
                 </div>
               </div>
@@ -429,14 +447,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <span className="text-[10px] text-emerald-700 font-mono font-bold">+6.5 hrs</span>
                   <button
                     onClick={onDispatchDekra}
-                    disabled={isDekraDispatched}
-                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition ${
+                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition shadow-2xs ${
                       isDekraDispatched
-                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                        : 'bg-sky-600 hover:bg-sky-700 text-white shadow-xs'
+                        ? 'bg-sky-50 text-sky-800 border border-sky-300 hover:bg-sky-100'
+                        : 'bg-sky-600 hover:bg-sky-700 text-white'
                     }`}
+                    title={isDekraDispatched ? 'Click to cancel Dekra booking links' : 'Schedule Dekra'}
                   >
-                    {isDekraDispatched ? 'Scheduled (39)' : 'Schedule Dekra'}
+                    {isDekraDispatched ? 'Scheduled · Undo' : 'Schedule Dekra'}
                   </button>
                 </div>
               </div>
