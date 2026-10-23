@@ -20,7 +20,10 @@ import {
   MessageSquare,
   Smartphone,
   Headphones,
-  Bot
+  Bot,
+  FileText,
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import { Claim, ClaimAssessment } from '../../lib/ruleEngine';
 import { NavTab } from '../Sidebar';
@@ -43,6 +46,7 @@ interface DashboardViewProps {
   onDispatchDekra: () => void;
   onNavigateToCases: (filter?: string) => void;
   onSelectClaim: (claimId: string) => void;
+  onOpenBulkReplyModal?: (cluster: 'glass' | 'haftpflicht' | 'duplicates' | 'dekra') => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -63,6 +67,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   onDispatchDekra,
   onNavigateToCases,
   onSelectClaim,
+  onOpenBulkReplyModal
 }) => {
   const totalClaims = claims.length;
   const percentage = Math.round((stats.handledCount / totalClaims) * 100);
@@ -77,6 +82,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     whatsapp: claims.filter(c => c.channel === 'whatsapp').length,
     desk: claims.filter(c => c.channel === 'service_desk').length,
   };
+
+  // Landmine counts
+  const glassClaimsCount = claims.filter(c => c.is_storm_claim && c.has_glass && c.policy_coverage !== 'Haftpflicht').length;
+  const haftpflichtClaimsCount = claims.filter(c => c.is_storm_claim && c.policy_coverage === 'Haftpflicht').length;
+  const duplicateClaimsCount = claims.filter(c => c.is_duplicate).length;
+  const dekraClaimsCount = claims.filter(c => c.is_storm_claim && !c.has_glass && c.policy_coverage !== 'Haftpflicht' && !c.is_duplicate).length;
 
   return (
     <div className="space-y-6">
@@ -193,46 +204,62 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </section>
 
-      {/* 2. PRIORITY ACTION TILES & EMERGENCY TRIAGE */}
+      {/* 2. ALL 5 OPERATIONAL LANDMINES & MASS TRIAGE MATRIX */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-gray-700">Priority Action Tiles (Before Midday)</h2>
+            <div className="p-1 rounded bg-[#cf5f09]/10 text-integral-copper-600">
+              <ShieldAlert className="w-4 h-4" />
+            </div>
+            <h2 className="text-xs font-bold uppercase tracking-wider text-gray-950">
+              The 5 Critical Operational Landmines (08:00 CEST Urgent Matrix)
+            </h2>
             <span className="text-xs text-gray-300">·</span>
-            <span className="text-xs text-gray-500">Critical items requiring handler decision</span>
+            <span className="text-xs text-gray-500">Uncovered in the 270 claim dataset · Triaged to Case Management</span>
           </div>
           <button 
             onClick={() => onNavigateToCases('urgent')}
             className="text-xs font-semibold text-integral-copper-600 hover:text-integral-copper-700 flex items-center space-x-1"
           >
-            <span>View All in Case Ledger</span>
+            <span>Open Triage Queue in Case Management</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           
-          {/* Tile 1: Autohaus Brandl (5 cols) */}
-          <div className="lg:col-span-6 bg-amber-50/70 border border-amber-200/90 rounded-xl p-4 flex flex-col justify-between shadow-xs">
+          {/* LANDMINE 1: Autohaus Brandl Slot Expiry */}
+          <div className={`border rounded-xl p-4 flex flex-col justify-between shadow-xs transition-all ${
+            isAutohausApproved ? 'bg-emerald-50/60 border-emerald-200' : 'bg-amber-50/70 border-amber-200/90'
+          }`}>
             <div>
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-2">
-                  <div className="p-1.5 rounded-lg bg-amber-100 text-amber-800">
+                  <div className={`p-1.5 rounded-lg ${isAutohausApproved ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
                     <Clock className="w-4 h-4" />
                   </div>
                   <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900 block">Landmine #1 · SLA Deadline</span>
                     <span className="text-xs font-mono font-bold text-gray-950">KS-26-104234 · Ursula Popescu</span>
-                    <span className="text-[11px] text-amber-800 block font-semibold">Autohaus Brandl 12:00 Slot Expiry</span>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 rounded">
-                  {isAutohausApproved ? 'Approved' : 'Ticking 03h 54m'}
+                <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${
+                  isAutohausApproved 
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+                    : 'bg-amber-100 text-amber-800 border-amber-300 animate-pulse'
+                }`}>
+                  {isAutohausApproved ? '✅ Approved' : '⏳ Ticking 03h 54m'}
                 </span>
               </div>
-              <p className="text-xs text-gray-700 mt-2 leading-relaxed">
+              <p className="text-xs text-gray-700 mt-2.5 leading-relaxed">
                 Estimate <strong>€3,860 net</strong> is under Dekra benchmark (€3,910). Reserved repair slot today at 13:00 will be forfeited if not approved in writing before 12:00 PM.
               </p>
+              <div className="mt-2 text-[11px] text-gray-500 font-mono flex items-center space-x-1.5">
+                <span className="font-semibold text-gray-700">Financial Impact:</span>
+                <span>€3,860 authorized (Save €350 rental delay)</span>
+              </div>
             </div>
+
             <div className="mt-3 pt-2.5 border-t border-amber-200/60 flex items-center justify-between text-xs">
               <button
                 onClick={() => onSelectClaim('KS-26-104234')}
@@ -242,15 +269,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <ArrowRight className="w-3 h-3" />
               </button>
               {isAutohausApproved ? (
-                <div className="flex items-center space-x-2">
-                  <span className="text-emerald-700 font-semibold flex items-center space-x-1">
+                <div className="flex items-center space-x-1.5">
+                  <span className="text-emerald-700 font-semibold text-[11px] flex items-center space-x-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Approved &amp; Slot Locked</span>
+                    <span>Slot Locked</span>
                   </span>
                   <button
                     onClick={onApproveAutohaus}
                     className="px-2 py-0.5 text-[11px] font-medium text-gray-600 hover:text-gray-950 bg-white border border-gray-200 rounded shadow-2xs hover:bg-gray-50 transition"
-                    title="Undo approval and return to pending"
                   >
                     Undo
                   </button>
@@ -258,35 +284,46 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               ) : (
                 <button
                   onClick={onApproveAutohaus}
-                  className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg shadow-xs transition"
+                  className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-lg shadow-xs transition text-xs"
                 >
-                  1-Click Approve Freigabe (€3,860)
+                  1-Click Approve (€3,860)
                 </button>
               )}
             </div>
           </div>
 
-          {/* Tile 2: Tom Clarke (6 cols) */}
-          <div className="lg:col-span-6 bg-rose-50/70 border border-rose-200/90 rounded-xl p-4 flex flex-col justify-between shadow-xs">
+          {/* LANDMINE 2: Tom Clarke Rule 7 Mobility Breach */}
+          <div className={`border rounded-xl p-4 flex flex-col justify-between shadow-xs transition-all ${
+            isTomClarkeEscalated ? 'bg-emerald-50/60 border-emerald-200' : 'bg-rose-50/70 border-rose-200/90'
+          }`}>
             <div>
               <div className="flex items-start justify-between">
                 <div className="flex items-center space-x-2">
-                  <div className="p-1.5 rounded-lg bg-rose-100 text-rose-800">
+                  <div className={`p-1.5 rounded-lg ${isTomClarkeEscalated ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
                     <ShieldAlert className="w-4 h-4" />
                   </div>
                   <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-rose-900 block">Landmine #2 · Rule 7 Mobility</span>
                     <span className="text-xs font-mono font-bold text-gray-950">KS-26-104413 · Tom Clarke</span>
-                    <span className="text-[11px] text-rose-800 block font-semibold">Rule 7 Mobility Limit Breach (Rental Day 13/14)</span>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300 rounded">
-                  {isTomClarkeEscalated ? 'Escalated' : 'Illegal AI Promise'}
+                <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${
+                  isTomClarkeEscalated 
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+                    : 'bg-rose-100 text-rose-800 border-rose-300 animate-pulse'
+                }`}>
+                  {isTomClarkeEscalated ? '✅ Escalated' : '🚨 Illegal AI Promise'}
                 </span>
               </div>
-              <p className="text-xs text-gray-700 mt-2 leading-relaxed">
-                Customer requested extension through July 22 (21 days). Naive AI drafted an illegal promise of free rental, violating handbook 14-day limit without Team Lead sign-off.
+              <p className="text-xs text-gray-700 mt-2.5 leading-relaxed">
+                Customer requested rental extension to 21 days (hits day 13 tomorrow). Naive AI draft falsely promised free rental, violating 14-day policy cap without Team Lead approval.
               </p>
+              <div className="mt-2 text-[11px] text-gray-500 font-mono flex items-center space-x-1.5">
+                <span className="font-semibold text-gray-700">Financial Impact:</span>
+                <span>€450 unapproved rental liability blocked</span>
+              </div>
             </div>
+
             <div className="mt-3 pt-2.5 border-t border-rose-200/60 flex items-center justify-between text-xs">
               <button
                 onClick={() => onSelectClaim('KS-26-104413')}
@@ -296,15 +333,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <ArrowRight className="w-3 h-3" />
               </button>
               {isTomClarkeEscalated ? (
-                <div className="flex items-center space-x-2">
-                  <span className="text-emerald-700 font-semibold flex items-center space-x-1">
+                <div className="flex items-center space-x-1.5">
+                  <span className="text-emerald-700 font-semibold text-[11px] flex items-center space-x-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Escalated to Team Lead</span>
+                    <span>Lead Escalated</span>
                   </span>
                   <button
                     onClick={onEscalateTomClarke}
                     className="px-2 py-0.5 text-[11px] font-medium text-gray-600 hover:text-gray-950 bg-white border border-gray-200 rounded shadow-2xs hover:bg-gray-50 transition"
-                    title="Undo escalation"
                   >
                     Undo
                   </button>
@@ -312,7 +348,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               ) : (
                 <button
                   onClick={onEscalateTomClarke}
-                  className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg shadow-xs transition"
+                  className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg shadow-xs transition text-xs"
                 >
                   Escalate to Team Lead
                 </button>
@@ -320,233 +356,309 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             </div>
           </div>
 
+          {/* LANDMINE 3: 33 Haftpflicht Claims (€132,000 Leakage) */}
+          <div className={`border rounded-xl p-4 flex flex-col justify-between shadow-xs transition-all ${
+            isHaftpflichtQuarantined ? 'bg-emerald-50/60 border-emerald-200' : 'bg-red-50/70 border-red-200/90'
+          }`}>
+            <div>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className={`p-1.5 rounded-lg ${isHaftpflichtQuarantined ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-red-900 block">Landmine #3 · €132k Leakage</span>
+                    <span className="text-xs font-mono font-bold text-gray-950">33 Haftpflicht Claims</span>
+                  </div>
+                </div>
+                <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${
+                  isHaftpflichtQuarantined 
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+                    : 'bg-red-100 text-red-800 border-red-300 animate-pulse'
+                }`}>
+                  {isHaftpflichtQuarantined ? '✅ Quarantined' : '🚨 High Leakage Risk'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-700 mt-2.5 leading-relaxed">
+                Naive AI generated coverage promises for 33 third-party liability policies with zero hail damage coverage. At ~€4,000 avg damage = <strong>€132,000 unrecoverable loss</strong>.
+              </p>
+              <div className="mt-2 text-[11px] text-gray-500 font-mono flex items-center space-x-1.5">
+                <span className="font-semibold text-gray-700">Financial Impact:</span>
+                <span className="text-emerald-700 font-bold">€132,000 leakage prevented</span>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-2.5 border-t border-red-200/60 flex items-center justify-between text-xs gap-2">
+              <button
+                onClick={() => onOpenBulkReplyModal ? onOpenBulkReplyModal('haftpflicht') : onNavigateToCases('haftpflicht')}
+                className="px-2.5 py-1.5 bg-red-800 hover:bg-red-900 text-white font-semibold rounded-lg shadow-xs transition flex items-center space-x-1 text-[11px]"
+                title="Review templatized rejection notice and bulk send to 33 policyholders"
+              >
+                <Mail className="w-3 h-3" />
+                <span>Review &amp; Bulk Send (33)</span>
+              </button>
+
+              <button
+                onClick={onQuarantineHaftpflicht}
+                className={`px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition shadow-2xs ${
+                  isHaftpflichtQuarantined
+                    ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                    : 'bg-red-600 hover:bg-red-700 text-white'
+                }`}
+              >
+                {isHaftpflichtQuarantined ? 'Quarantined · Undo' : '1-Click Halt'}
+              </button>
+            </div>
+          </div>
+
+          {/* LANDMINE 4: 21 Duplicate Pairs (42 Claims) */}
+          <div className={`border rounded-xl p-4 flex flex-col justify-between shadow-xs transition-all ${
+            isDuplicatesMerged ? 'bg-emerald-50/60 border-emerald-200' : 'bg-purple-50/70 border-purple-200/90'
+          }`}>
+            <div>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className={`p-1.5 rounded-lg ${isDuplicatesMerged ? 'bg-emerald-100 text-emerald-800' : 'bg-purple-100 text-purple-800'}`}>
+                    <Merge className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-purple-900 block">Landmine #4 · Channel Flood</span>
+                    <span className="text-xs font-mono font-bold text-gray-950">21 Pairs · 42 Duplicates</span>
+                  </div>
+                </div>
+                <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${
+                  isDuplicatesMerged 
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+                    : 'bg-purple-100 text-purple-800 border-purple-300'
+                }`}>
+                  {isDuplicatesMerged ? '✅ Merged' : '⚠️ Redundant Queue'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-700 mt-2.5 leading-relaxed">
+                Overnight callers panicked and submitted across Voice, App, and WhatsApp. Individual replies waste 10.5 handler hours and trigger conflicting status updates.
+              </p>
+              <div className="mt-2 text-[11px] text-gray-500 font-mono flex items-center space-x-1.5">
+                <span className="font-semibold text-gray-700">Capacity Impact:</span>
+                <span className="text-emerald-700 font-bold">+10.5 handler hours saved</span>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-2.5 border-t border-purple-200/60 flex items-center justify-between text-xs gap-2">
+              <button
+                onClick={() => onOpenBulkReplyModal ? onOpenBulkReplyModal('duplicates') : onNavigateToCases('duplicates')}
+                className="px-2.5 py-1.5 bg-purple-700 hover:bg-purple-800 text-white font-semibold rounded-lg shadow-xs transition flex items-center space-x-1 text-[11px]"
+                title="Review consolidation template and bulk merge with confirmation notice"
+              >
+                <Merge className="w-3 h-3" />
+                <span>Review &amp; Merge (42)</span>
+              </button>
+
+              <button
+                onClick={onMergeDuplicates}
+                className={`px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition shadow-2xs ${
+                  isDuplicatesMerged
+                    ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                    : 'bg-purple-600 hover:bg-purple-700 text-white'
+                }`}
+              >
+                {isDuplicatesMerged ? 'Merged · Undo' : '1-Click Merge'}
+              </button>
+            </div>
+          </div>
+
+          {/* LANDMINE 5: 117 Broken Glass Claims (StVZO Safety Breach) */}
+          <div className={`border rounded-xl p-4 flex flex-col justify-between shadow-xs transition-all ${
+            isGlassDispatched ? 'bg-emerald-50/60 border-emerald-200' : 'bg-emerald-50/70 border-emerald-200/90'
+          }`}>
+            <div>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className={`p-1.5 rounded-lg ${isGlassDispatched ? 'bg-emerald-200 text-emerald-900' : 'bg-emerald-100 text-emerald-800'}`}>
+                    <Truck className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-900 block">Landmine #5 · StVZO Safety</span>
+                    <span className="text-xs font-mono font-bold text-gray-950">117 Broken Glass Claims</span>
+                  </div>
+                </div>
+                <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${
+                  isGlassDispatched 
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+                    : 'bg-amber-100 text-amber-800 border-amber-300'
+                }`}>
+                  {isGlassDispatched ? '✅ Partner Dispatched' : '⚠️ Unroadworthy (Klarsicht)'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-700 mt-2.5 leading-relaxed">
+                Vehicles cannot legally be driven to Dekra appraisal hubs under StVZO. Naive AI told them to drive; must be routed to <strong>Klarsicht Autoglas</strong> on-site mobile vans.
+              </p>
+              <div className="mt-2 text-[11px] text-gray-500 font-mono flex items-center space-x-1.5">
+                <span className="font-semibold text-gray-700">Capacity Impact:</span>
+                <span className="text-emerald-700 font-bold">+19.5 handler hours saved</span>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-2.5 border-t border-emerald-200/60 flex items-center justify-between text-xs gap-2">
+              <button
+                onClick={() => onOpenBulkReplyModal ? onOpenBulkReplyModal('glass') : onNavigateToCases('glass')}
+                className="px-2.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold rounded-lg shadow-xs transition flex items-center space-x-1 text-[11px]"
+                title="Review Klarsicht booking link template and bulk dispatch to 117 policyholders"
+              >
+                <Send className="w-3 h-3" />
+                <span>Review &amp; Dispatch (117)</span>
+              </button>
+
+              <button
+                onClick={onDispatchGlass}
+                className={`px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition shadow-2xs ${
+                  isGlassDispatched
+                    ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                }`}
+              >
+                {isGlassDispatched ? 'Dispatched · Undo' : '1-Click Dispatch'}
+              </button>
+            </div>
+          </div>
+
+          {/* LANDMINE 6 / MASS ROUTE: 39 Dekra Drive-In Assessments */}
+          <div className={`border rounded-xl p-4 flex flex-col justify-between shadow-xs transition-all ${
+            isDekraDispatched ? 'bg-emerald-50/60 border-emerald-200' : 'bg-sky-50/70 border-sky-200/90'
+          }`}>
+            <div>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className={`p-1.5 rounded-lg ${isDekraDispatched ? 'bg-emerald-100 text-emerald-800' : 'bg-sky-100 text-sky-800'}`}>
+                    <CheckSquare className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-sky-900 block">Mass Routing · Drive-In</span>
+                    <span className="text-xs font-mono font-bold text-gray-950">39 Dekra Drive-In Claims</span>
+                  </div>
+                </div>
+                <span className={`px-2 py-0.5 text-[10px] font-bold rounded border ${
+                  isDekraDispatched 
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+                    : 'bg-sky-100 text-sky-800 border-sky-300'
+                }`}>
+                  {isDekraDispatched ? '✅ Hub Scheduled' : '🚗 Drivable Bodywork'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-700 mt-2.5 leading-relaxed">
+                Vehicles are drivable with bodywork hail dents. Batch schedule into Munich Olympic Park Mass Assessment Hub for automated laser appraisal.
+              </p>
+              <div className="mt-2 text-[11px] text-gray-500 font-mono flex items-center space-x-1.5">
+                <span className="font-semibold text-gray-700">Capacity Impact:</span>
+                <span className="text-emerald-700 font-bold">+6.5 handler hours saved</span>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-2.5 border-t border-sky-200/60 flex items-center justify-between text-xs gap-2">
+              <button
+                onClick={() => onOpenBulkReplyModal ? onOpenBulkReplyModal('dekra') : onNavigateToCases('dekra')}
+                className="px-2.5 py-1.5 bg-sky-700 hover:bg-sky-800 text-white font-semibold rounded-lg shadow-xs transition flex items-center space-x-1 text-[11px]"
+                title="Review Dekra Drive-In booking template and bulk schedule 39 claims"
+              >
+                <CheckSquare className="w-3 h-3" />
+                <span>Review &amp; Schedule (39)</span>
+              </button>
+
+              <button
+                onClick={onDispatchDekra}
+                className={`px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition shadow-2xs ${
+                  isDekraDispatched
+                    ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                    : 'bg-sky-600 hover:bg-sky-700 text-white'
+                }`}
+              >
+                {isDekraDispatched ? 'Scheduled · Undo' : '1-Click Schedule'}
+              </button>
+            </div>
+          </div>
+
         </div>
       </section>
 
-      {/* 3. AUTONOMOUS BULK TILES & CHANNEL INTAKE PULSE */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        
-        {/* Left: 4 Autonomous Execution Tiles (7 cols) */}
-        <div className="lg:col-span-7 bg-white border border-gray-200/80 rounded-xl p-4 shadow-xs flex flex-col justify-between">
+      {/* 3. OMNICHANNEL INGESTION STREAMS & DATA VERIFICATION */}
+      <section className="bg-white border border-gray-200/80 rounded-xl p-5 shadow-xs">
+        <div className="flex items-center justify-between pb-3 border-b border-gray-200/80">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-gray-200/80">
-              <div className="flex items-center space-x-2">
-                <Zap className="w-4 h-4 text-integral-copper-600" />
-                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-950">Autonomous Batch Operations</h3>
-              </div>
-              <span className="text-[11px] font-mono font-semibold text-[#cf5f09]">198 Claims Handled Zero-Touch</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-3">
-              
-              {/* Batch 1: Duplicates */}
-              <div className="p-3 bg-gray-50/80 border border-gray-200/80 rounded-xl flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-gray-900 mb-1">
-                    <span className="flex items-center space-x-1.5">
-                      <Merge className="w-3.5 h-3.5 text-integral-copper-600" />
-                      <span>Rule 4 Deduplication</span>
-                    </span>
-                    <span className="text-[11px] font-mono text-gray-500">21 Pairs</span>
-                  </div>
-                  <p className="text-[11px] text-gray-600 leading-snug">
-                    Auto-merge 42 multi-channel duplicate submissions and silence redundant replies.
-                  </p>
-                </div>
-                <div className="mt-2.5 pt-2 border-t border-gray-200/60 flex items-center justify-between">
-                  <span className="text-[10px] text-emerald-700 font-mono font-bold">+10.5 hrs</span>
-                  <button
-                    onClick={onMergeDuplicates}
-                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition shadow-2xs ${
-                      isDuplicatesMerged
-                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
-                        : 'bg-integral-copper-600 hover:bg-integral-copper-700 text-white'
-                    }`}
-                    title={isDuplicatesMerged ? 'Click to unmerge and reverse duplicate consolidation' : 'Merge duplicates'}
-                  >
-                    {isDuplicatesMerged ? 'Merged · Undo' : 'Merge All'}
-                  </button>
-                </div>
-              </div>
-
-              {/* Batch 2: Halt Drafts */}
-              <div className="p-3 bg-gray-50/80 border border-gray-200/80 rounded-xl flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-gray-900 mb-1">
-                    <span className="flex items-center space-x-1.5">
-                      <ShieldCheck className="w-3.5 h-3.5 text-rose-600" />
-                      <span>Halt Liability Drafts</span>
-                    </span>
-                    <span className="text-[11px] font-mono text-gray-500">33 Claims</span>
-                  </div>
-                  <p className="text-[11px] text-gray-600 leading-snug">
-                    Stop false AI promises for policyholders with zero storm coverage (€132k saved).
-                  </p>
-                </div>
-                <div className="mt-2.5 pt-2 border-t border-gray-200/60 flex items-center justify-between">
-                  <span className="text-[10px] text-emerald-700 font-mono font-bold">+8.25 hrs</span>
-                  <button
-                    onClick={onQuarantineHaftpflicht}
-                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition shadow-2xs ${
-                      isHaftpflichtQuarantined
-                        ? 'bg-rose-50 text-rose-800 border border-rose-300 hover:bg-rose-100'
-                        : 'bg-rose-600 hover:bg-rose-700 text-white'
-                    }`}
-                    title={isHaftpflichtQuarantined ? 'Click to release quarantine and reverse draft halt' : 'Halt drafts'}
-                  >
-                    {isHaftpflichtQuarantined ? 'Halted · Undo' : 'Halt 33 Drafts'}
-                  </button>
-                </div>
-              </div>
-
-              {/* Batch 3: Glass */}
-              <div className="p-3 bg-gray-50/80 border border-gray-200/80 rounded-xl flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-gray-900 mb-1">
-                    <span className="flex items-center space-x-1.5">
-                      <Send className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Rule 5 Glass Emergency</span>
-                    </span>
-                    <span className="text-[11px] font-mono text-gray-500">117 Claims</span>
-                  </div>
-                  <p className="text-[11px] text-gray-600 leading-snug">
-                    Send on-site mobile booking links for partner Klarsicht Autoglas.
-                  </p>
-                </div>
-                <div className="mt-2.5 pt-2 border-t border-gray-200/60 flex items-center justify-between">
-                  <span className="text-[10px] text-emerald-700 font-mono font-bold">+19.5 hrs</span>
-                  <button
-                    onClick={onDispatchGlass}
-                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition shadow-2xs ${
-                      isGlassDispatched
-                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100'
-                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                    }`}
-                    title={isGlassDispatched ? 'Click to recall dispatched links' : 'Dispatch links'}
-                  >
-                    {isGlassDispatched ? 'Dispatched · Undo' : 'Dispatch Links'}
-                  </button>
-                </div>
-              </div>
-
-              {/* Batch 4: Dekra */}
-              <div className="p-3 bg-gray-50/80 border border-gray-200/80 rounded-xl flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-gray-900 mb-1">
-                    <span className="flex items-center space-x-1.5">
-                      <CheckSquare className="w-3.5 h-3.5 text-sky-600" />
-                      <span>Rule 6 Dekra Drive-In</span>
-                    </span>
-                    <span className="text-[11px] font-mono text-gray-500">39 Claims</span>
-                  </div>
-                  <p className="text-[11px] text-gray-600 leading-snug">
-                    Batch schedule drivable hail claims into Munich Mass Assessment Center.
-                  </p>
-                </div>
-                <div className="mt-2.5 pt-2 border-t border-gray-200/60 flex items-center justify-between">
-                  <span className="text-[10px] text-emerald-700 font-mono font-bold">+6.5 hrs</span>
-                  <button
-                    onClick={onDispatchDekra}
-                    className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition shadow-2xs ${
-                      isDekraDispatched
-                        ? 'bg-sky-50 text-sky-800 border border-sky-300 hover:bg-sky-100'
-                        : 'bg-sky-600 hover:bg-sky-700 text-white'
-                    }`}
-                    title={isDekraDispatched ? 'Click to cancel Dekra booking links' : 'Schedule Dekra'}
-                  >
-                    {isDekraDispatched ? 'Scheduled · Undo' : 'Schedule Dekra'}
-                  </button>
-                </div>
-              </div>
-
-            </div>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-950">Omnichannel Intake Streams (Munich Hail Storm Event)</h3>
+            <p className="text-[11px] text-gray-500 mt-0.5">270 FNOL submissions ingested between 22:00 (13 Jul) and 07:30 (14 Jul)</p>
           </div>
+          <span className="text-[11px] font-mono text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+            100% Policy Resolution Rate (69/69 policies matched)
+          </span>
         </div>
 
-        {/* Right: Omnichannel Ingestion Pulse (5 cols) */}
-        <div className="lg:col-span-5 bg-white border border-gray-200/80 rounded-xl p-4 shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-3 border-b border-gray-200/80">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-950">Omnichannel Intake Streams</h3>
-              <span className="text-[11px] text-gray-500 font-mono">270 Ingested</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-4 text-xs">
+          
+          <div 
+            onClick={() => onNavigateToCases('app')}
+            className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer border border-gray-200/60"
+          >
+            <div className="flex items-center space-x-2">
+              <Smartphone className="w-4 h-4 text-sky-600" />
+              <span className="font-semibold text-gray-800">Mobile App</span>
             </div>
-
-            <div className="space-y-2.5 pt-3 text-xs">
-              
-              <div 
-                onClick={() => onNavigateToCases('app')}
-                className="flex items-center justify-between p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
-              >
-                <div className="flex items-center space-x-2">
-                  <Smartphone className="w-4 h-4 text-sky-600" />
-                  <span className="font-semibold text-gray-800">Mobile App Ingestion</span>
-                </div>
-                <span className="font-mono font-bold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200 shadow-2xs">
-                  {channelCounts.app} claims (55%)
-                </span>
-              </div>
-
-              <div 
-                onClick={() => onNavigateToCases('email')}
-                className="flex items-center justify-between p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
-              >
-                <div className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4 text-integral-copper-600" />
-                  <span className="font-semibold text-gray-800">Inbound Email Dispatch</span>
-                </div>
-                <span className="font-mono font-bold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200 shadow-2xs">
-                  {channelCounts.email} claims (17%)
-                </span>
-              </div>
-
-              <div 
-                onClick={() => onNavigateToCases('voice')}
-                className="flex items-center justify-between p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
-              >
-                <div className="flex items-center space-x-2">
-                  <Phone className="w-4 h-4 text-indigo-600" />
-                  <span className="font-semibold text-gray-800">Overnight Voice Agent</span>
-                </div>
-                <span className="font-mono font-bold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200 shadow-2xs">
-                  {channelCounts.voice} claims (15%)
-                </span>
-              </div>
-
-              <div 
-                onClick={() => onNavigateToCases('whatsapp')}
-                className="flex items-center justify-between p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
-              >
-                <div className="flex items-center space-x-2">
-                  <MessageSquare className="w-4 h-4 text-emerald-600" />
-                  <span className="font-semibold text-gray-800">WhatsApp Self-Service</span>
-                </div>
-                <span className="font-mono font-bold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200 shadow-2xs">
-                  {channelCounts.whatsapp} claims (9%)
-                </span>
-              </div>
-
-              <div 
-                onClick={() => onNavigateToCases('desk')}
-                className="flex items-center justify-between p-2 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
-              >
-                <div className="flex items-center space-x-2">
-                  <Headphones className="w-4 h-4 text-purple-600" />
-                  <span className="font-semibold text-gray-800">Direct Broker / Service Desk</span>
-                </div>
-                <span className="font-mono font-bold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200 shadow-2xs">
-                  {channelCounts.desk} claims (5%)
-                </span>
-              </div>
-
-            </div>
+            <span className="font-mono font-bold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200 shadow-2xs">
+              {channelCounts.app} (55%)
+            </span>
           </div>
 
-          <div className="pt-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-            <span>Deterministic Policy Match Rate:</span>
-            <span className="text-emerald-700 font-bold font-mono">100% (69/69 resolved)</span>
+          <div 
+            onClick={() => onNavigateToCases('email')}
+            className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer border border-gray-200/60"
+          >
+            <div className="flex items-center space-x-2">
+              <Mail className="w-4 h-4 text-integral-copper-600" />
+              <span className="font-semibold text-gray-800">Inbound Email</span>
+            </div>
+            <span className="font-mono font-bold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200 shadow-2xs">
+              {channelCounts.email} (17%)
+            </span>
           </div>
+
+          <div 
+            onClick={() => onNavigateToCases('voice')}
+            className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer border border-gray-200/60"
+          >
+            <div className="flex items-center space-x-2">
+              <Phone className="w-4 h-4 text-indigo-600" />
+              <span className="font-semibold text-gray-800">Overnight Voice</span>
+            </div>
+            <span className="font-mono font-bold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200 shadow-2xs">
+              {channelCounts.voice} (15%)
+            </span>
+          </div>
+
+          <div 
+            onClick={() => onNavigateToCases('whatsapp')}
+            className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer border border-gray-200/60"
+          >
+            <div className="flex items-center space-x-2">
+              <MessageSquare className="w-4 h-4 text-emerald-600" />
+              <span className="font-semibold text-gray-800">WhatsApp</span>
+            </div>
+            <span className="font-mono font-bold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200 shadow-2xs">
+              {channelCounts.whatsapp} (9%)
+            </span>
+          </div>
+
+          <div 
+            onClick={() => onNavigateToCases('desk')}
+            className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer border border-gray-200/60"
+          >
+            <div className="flex items-center space-x-2">
+              <Headphones className="w-4 h-4 text-purple-600" />
+              <span className="font-semibold text-gray-800">Service Desk</span>
+            </div>
+            <span className="font-mono font-bold text-gray-900 bg-white px-2 py-0.5 rounded border border-gray-200 shadow-2xs">
+              {channelCounts.desk} (5%)
+            </span>
+          </div>
+
         </div>
-
       </section>
 
     </div>

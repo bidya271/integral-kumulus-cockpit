@@ -51,6 +51,7 @@ interface CaseManagementViewProps {
   isDuplicatesMerged?: boolean;
   isGlassDispatched?: boolean;
   isDekraDispatched?: boolean;
+  onOpenBulkReplyModal?: (cluster: 'glass' | 'haftpflicht' | 'duplicates' | 'dekra') => void;
 }
 
 export interface ClaimTriageInfo {
@@ -305,7 +306,8 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
   isHaftpflichtQuarantined = false,
   isDuplicatesMerged = false,
   isGlassDispatched = false,
-  isDekraDispatched = false
+  isDekraDispatched = false,
+  onOpenBulkReplyModal
 }) => {
   const flags = useMemo(() => ({
     isAutohausApproved,
@@ -603,17 +605,47 @@ export const CaseManagementView: React.FC<CaseManagementViewProps> = ({
             </div>
           </div>
 
-          <div className="text-[11px] text-gray-500">
-            {solvedCount > 0 ? (
-              <span className="text-emerald-700 font-semibold flex items-center space-x-1">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>{((solvedCount / claims.length) * 100).toFixed(0)}% Queue Cleared ({solvedCount} of {claims.length} triaged)</span>
-              </span>
-            ) : (
-              <span className="text-amber-700 font-medium">
-                0% Cleared · Execute batch dispatches in Operations Pulse
-              </span>
+          <div className="flex items-center space-x-3">
+            {onOpenBulkReplyModal && (
+              <div className="flex items-center space-x-1.5">
+                <button
+                  onClick={() => onOpenBulkReplyModal('glass')}
+                  className="px-2.5 py-1 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg shadow-2xs transition flex items-center space-x-1"
+                  title="Review Klarsicht booking template and bulk dispatch to 117 glass claims"
+                >
+                  <Send className="w-3 h-3" />
+                  <span>Bulk Glass (117)</span>
+                </button>
+                <button
+                  onClick={() => onOpenBulkReplyModal('haftpflicht')}
+                  className="px-2.5 py-1 text-xs font-semibold bg-red-700 hover:bg-red-800 text-white rounded-lg shadow-2xs transition flex items-center space-x-1"
+                  title="Review Haftpflicht rejection template and bulk send to 33 policyholders"
+                >
+                  <Mail className="w-3 h-3" />
+                  <span>Bulk Reject (33)</span>
+                </button>
+                <button
+                  onClick={() => onOpenBulkReplyModal('duplicates')}
+                  className="px-2.5 py-1 text-xs font-semibold bg-purple-700 hover:bg-purple-800 text-white rounded-lg shadow-2xs transition flex items-center space-x-1"
+                  title="Review duplicate consolidation template and bulk merge 42 claims"
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>Bulk Merge (42)</span>
+                </button>
+              </div>
             )}
+            <div className="text-[11px] text-gray-500">
+              {solvedCount > 0 ? (
+                <span className="text-emerald-700 font-semibold flex items-center space-x-1">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>{((solvedCount / claims.length) * 100).toFixed(0)}% Queue Cleared ({solvedCount} of {claims.length} triaged)</span>
+                </span>
+              ) : (
+                <span className="text-amber-700 font-medium">
+                  0% Cleared · Execute batch dispatches in Operations Pulse
+                </span>
+              )}
+            </div>
           </div>
         </div>
 

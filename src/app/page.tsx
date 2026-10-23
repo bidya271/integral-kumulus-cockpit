@@ -10,6 +10,7 @@ import { CaseManagementView } from '../components/views/CaseManagementView';
 import { AiStudioView } from '../components/views/AiStudioView';
 import { RulesEngineView } from '../components/views/RulesEngineView';
 import { WorkLogModal } from '../components/WorkLogModal';
+import { BulkReplyModal, BulkClusterType } from '../components/BulkReplyModal';
 
 export default function Home() {
   // Navigation State
@@ -37,6 +38,10 @@ export default function Home() {
   const [isDuplicatesMerged, setIsDuplicatesMerged] = useState(false);
   const [isGlassDispatched, setIsGlassDispatched] = useState(false);
   const [isDekraDispatched, setIsDekraDispatched] = useState(false);
+
+  // Templetized Bulk Dispatch Modal State
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [bulkModalCluster, setBulkModalCluster] = useState<BulkClusterType>('glass');
 
   // Hydrate state from localStorage on browser mount
   React.useEffect(() => {
@@ -217,6 +222,93 @@ export default function Home() {
     }
   };
 
+  // Open Templetized Bulk Dispatch Modal
+  const handleOpenBulkReplyModal = (cluster: BulkClusterType) => {
+    setBulkModalCluster(cluster);
+    setIsBulkModalOpen(true);
+  };
+
+  // Execute Bulk Dispatch for cluster
+  const handleExecuteBulkDispatch = (
+    cluster: BulkClusterType,
+    selectedClaimIds: string[],
+    subject: string,
+    templateBody: string
+  ) => {
+    const timeStr = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+    const idSet = new Set(selectedClaimIds);
+
+    // Generate individualized outgoing messages with interpolated placeholders
+    const newMessages = selectedClaimIds.map(claimId => {
+      const claim = claims.find(c => c.claim_id === claimId);
+      const policy = claim?.resolved_policy_id ? policyMap.get(claim.resolved_policy_id) : undefined;
+      const customerName = claim?.holder_name || claim?.reported_name || 'Versicherungsnehmer/in';
+      const plate = claim?.reported_plate || 'M-XX 000';
+      const deductible = policy?.deductible_teilkasko_eur ?? claim?.deductible_teilkasko_eur ?? 150;
+
+      const interpolated = templateBody
+        .replace(/\{\{customer_name\}\}/g, customerName)
+        .replace(/\{\{claim_id\}\}/g, claimId)
+        .replace(/\{\{plate\}\}/g, plate)
+        .replace(/\{\{deductible\}\}/g, deductible.toString())
+        .replace(/\{\{handler_name\}\}/g, 'Lena Huber');
+
+      return {
+        message_id: `msg-bulk-${cluster}-${claimId}-${Date.now()}`,
+        claim_id: claimId,
+        direction: 'outgoing',
+        channel: 'email',
+        author: 'Lena Huber (Senior Adjuster - Batch Dispatch)',
+        sender_name: 'Lena Huber (Desk #4)',
+        sender_type: 'handler',
+        sent_at: `${timeStr} CEST`,
+        timestamp: `${timeStr} CEST`,
+        content: interpolated,
+        body: interpolated,
+        delivery_status: 'Delivered',
+      };
+    });
+
+    setMessages(prev => [...prev, ...newMessages]);
+
+    // Apply corresponding operational updates to claims
+    if (cluster === 'glass') {
+      setIsGlassDispatched(true);
+      setClaims(prev => prev.map(c => 
+        idSet.has(c.claim_id) ? { 
+          ...c, 
+          notes: 'Bulk Dispatched: Mobile Klarsicht Autoglas on-site repair link delivered.' 
+        } : c
+      ));
+    } else if (cluster === 'haftpflicht') {
+      setIsHaftpflichtQuarantined(true);
+      setClaims(prev => prev.map(c => 
+        idSet.has(c.claim_id) ? { 
+          ...c, 
+          status: 'closed', 
+          notes: 'Bulk Sent: Official Haftpflicht rejection notice delivered. €4k leakage prevented.' 
+        } : c
+      ));
+    } else if (cluster === 'duplicates') {
+      setIsDuplicatesMerged(true);
+      setClaims(prev => prev.map(c => 
+        idSet.has(c.claim_id) ? { 
+          ...c, 
+          status: 'merged', 
+          notes: 'Bulk Sent: Duplicate consolidation notice delivered. Record merged.' 
+        } : c
+      ));
+    } else if (cluster === 'dekra') {
+      setIsDekraDispatched(true);
+      setClaims(prev => prev.map(c => 
+        idSet.has(c.claim_id) ? { 
+          ...c, 
+          notes: 'Bulk Dispatched: Munich Olympic Park Dekra Drive-In mass appraisal booking link delivered.' 
+        } : c
+      ));
+    }
+  };
+
   // Revert / Reset Entire State back to 08:00 AM Morning Condition
   const handleResetAllState = () => {
     try {
@@ -390,6 +482,7 @@ export default function Home() {
                 onDispatchDekra={handleDispatchDekra}
                 onNavigateToCases={handleNavigateToCases}
                 onSelectClaim={handleSelectClaimFromDashboard}
+                onOpenBulkReplyModal={handleOpenBulkReplyModal}
               />
             </div>
           )}
@@ -416,6 +509,7 @@ export default function Home() {
                 isDuplicatesMerged={isDuplicatesMerged}
                 isGlassDispatched={isGlassDispatched}
                 isDekraDispatched={isDekraDispatched}
+                onOpenBulkReplyModal={handleOpenBulkReplyModal}
               />
             </div>
           )}
@@ -444,6 +538,16 @@ export default function Home() {
       <WorkLogModal
         isOpen={isWorkLogOpen}
         onClose={() => setIsWorkLogOpen(false)}
+      />
+
+      {/* Templetized Bulk Dispatch & Customer Messaging Modal */}
+      <BulkReplyModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        initialCluster={bulkModalCluster}
+        claims={claims}
+        policies={policies}
+        onExecuteBulkDispatch={handleExecuteBulkDispatch}
       />
     </div>
   );
