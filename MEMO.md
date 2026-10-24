@@ -79,15 +79,39 @@ All customer communications use an enterprise **bilingual standard**: official G
 ### 4. Which one number would tell Kumulus that the tool works?
 
 #### The North Star Metric:
-> **"Catastrophe Queue Clearance Rate: $\ge$90% of Assigned Storm Claims Dispatched to Physical Resolution within 15 Minutes of Shift Start (with €0 Haftpflicht Leakage)."**
+> **"First-Touch Repair Induction Rate: $\ge$85% within 24 Hours (with Zero Handler Rework)"**
 
-#### Why This is the Defining Metric:
-In catastrophe insurance, claim costs, rental car expenses, and customer churn are direct functions of **initial response latency**:
-* **Without the Tool (Traditional 4–6 Day Backlog):** Customers wait days without updates $\rightarrow$ panic and submit duplicate claims (42+ duplicates) $\rightarrow$ reserved workshop slots expire (Autohaus Brandl lost, delaying repairs to August and adding €350+ in avoidable rental costs) $\rightarrow$ rushed handlers or hallucinating AI models pay out non-covered liability claims.
-* **With the Tool (15-Minute Clearance):**
-  1. **Instant Relief:** By 08:03 AM, 117 glass victims receive mobile booking links and 39 drivable cars receive Dekra appointment invitations.
-  2. **100% Slot Retention:** Autohaus Brandl is approved before 08:10 AM, locking the 13:00 repair slot today.
-  3. **Zero Financial Leakage:** €132,000 in unentitled liability payouts are blocked at shift start.
+*(Defined as: The percentage of assigned catastrophe claims routed to a confirmed physical repair track—mobile glass dispatch, drive-in appraisal hub, or authorized partner workshop—on the initial touch within 24 hours of filing, with 0% requiring handler re-intervention, manual corrections, or post-dispatch disputes).*
+
+---
+
+#### Why This is the Definitive Number (Role & Assignment Defense)
+
+##### 1. From the Role Perspective (Senior Product Builder at Integral):
+* **Systems Thinking Over Vanity Velocity:** Weak product metrics reward raw activity (e.g., "claims clicked per hour" or "handler throughput"). But high-volume AI automation without quality gates causes catastrophic failure—a handler could hit 10x velocity by rubber-stamping AI drafts, triggering €132,000 in Haftpflicht leakage. First-Touch Repair Induction couples **speed** with **deterministic accuracy**.
+* **Directly Measurable Inside the Software Loop:** Unlike retrospective balance-sheet metrics (like LAE) that finance calculates months later, First-Touch Induction is tracked live inside the cockpit. Every batch action, Klarsicht API dispatch, and Dekra slot booking increments this metric in real time.
+* **The "Zero Rework" Quality Guardrail:** If an automated message sends a customer with shattered glass to a drive-in hub (violating StVZO § 40) or promises an unauthorized rental extension (Tom Clarke), the customer calls back, destroying first-touch induction and exposing handler rework.
+
+##### 2. From the Assignment Perspective (Lukas Zörner & Kumulus Catastrophe Operations):
+* **Halts the Catastrophe Flywheel on Day 1:** In a 9,140-claim catastrophe, delayed response triggers a destructive feedback loop:
+  1. *Customer Silence (4–6 day backlog)* $\rightarrow$ Customer panic $\rightarrow$ Multi-channel duplicate filings (21 duplicate pairs / 42 claims in Lena's inbox).
+  2. *Delayed Freigabe* $\rightarrow$ Reserved workshop slots lapse (Ursula Popescu loses her 13:00 PM Brandl slot by noon, delaying repairs to August and burning €350+ in rental costs).
+  3. *Unsafe Vehicles on Roads* $\rightarrow$ 117 shattered windshields sit idle without legally compliant mobile glass dispatch.
+* **Immediate Commercial & Operational Relief:** Achieving $\ge$85% First-Touch Induction within 24 hours solves the Munich storm:
+  * **117 glass victims** receive driveway repair links before 08:05 AM.
+  * **39 drivable dent claims** receive scheduled Olympic Park drive-in slots.
+  * **Autohaus Brandl's 13:00 slot** is approved at 08:08 AM.
+  * **33 non-covered Haftpflicht claims** receive polite, legally compliant rejection notices with €0 leakage.
+
+---
+
+#### Why the Alternatives Were Rejected (Criticizing the Obvious Options):
+
+| Alternative Metric | Why It Was Considered | Fatal Flaw & Why It Fails |
+| :--- | :--- | :--- |
+| **Option A: Loss Adjustment Expense (LAE) per Claim** *(e.g., reduce from €140 to €18)* | The CFO's favorite metric. Measures the pure administrative cost of settling a claim. | **Retrospective & Lagging:** LAE is compiled by actuaries 60–90 days post-storm after invoices clear. Lena and her Team Lead cannot manage or optimize LAE at 08:00 AM on Desk #4. Furthermore, slashing LAE by aggressively denying claims spikes churn and triggers BaFin regulatory fines. |
+| **Option B: Handler Capacity Multiplier** *(e.g., 7.7x capacity / 270 vs. 35 baseline)* | Classic operational throughput. Measures how many claims one adjuster can "process" in a shift. | **Vanity Metric & Incentivizes Rubber-Stamping:** Measures internal activity (*effort*), not customer resolution (*outcome*). A handler evaluated on capacity can clear 270 claims in 30 minutes by clicking "Approve All", paying out invalid claims and sending dangerous driving instructions to broken-glass policyholders. |
+| **Option C: First-Touch Repair Induction Rate ($\ge$85%)** | **Selected Winner.** Combines speed, supply-chain induction, customer resolution, and zero rework. | **Captures the Complete End-to-End Truth:** It only fires when the customer is actually moving toward physical repair, policy rules are respected, and zero downstream cleanup is created. |
 
 ---
 
