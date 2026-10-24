@@ -102,7 +102,7 @@ npm run dev
 
 ---
 
-## 📦 Deploying to Vercel
+## Deploying to Vercel
 
 ```bash
 # Push to your GitHub account and import into Vercel, or deploy directly via Vercel CLI:
