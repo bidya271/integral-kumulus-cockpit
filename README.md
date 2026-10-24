@@ -6,14 +6,14 @@
 
 ---
 
-## ⚡ Live Prototype & Repository
+## Live Prototype & Repository
 
 * **Live Interactive Prototype:** [https://integral-kumulus-cockpit.vercel.app](https://integral-kumulus-cockpit.vercel.app) *(or connect your Vercel project to this repository)*
 * **GitHub Repository:** [https://github.com/bidya271/integral-kumulus-cockpit](https://github.com/bidya271/integral-kumulus-cockpit)
 
 ---
 
-## 📋 The Situation (The "Munich Kumul")
+## The Situation (The "Munich Kumul")
 
 * **Snapshot Time:** Tuesday, 14 July 2026, 07:45 CEST. Lena starts her shift at 08:00.
 * **Catastrophe Event:** A violent hailstorm crossed Munich between 18:20 and 19:00 the evening before.
@@ -22,7 +22,7 @@
 
 ---
 
-## 🎯 The Four Answers (Executive Summary)
+## The Four Answers (Executive Summary)
 
 ### 1. What does your tool do for Lena this morning, and what in the data made you choose that?
 Lena cannot handle 270 claims sequentially—doing so would take **40+ hours**, allowing urgent deadlines to expire and letting false AI promises reach customers.
@@ -56,7 +56,7 @@ The tool is a **Rules-Driven Claims Dispatch Cockpit** that solves the specific 
 
 ---
 
-## 🛠️ Architecture & System Structure
+## Architecture & System Structure
 
 ```
 integral-claims-cockpit/
@@ -84,7 +84,7 @@ integral-claims-cockpit/
 
 ---
 
-## 🚀 Running Locally
+## Running Locally
 
 ```bash
 # Clone the repository
