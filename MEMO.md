@@ -5,6 +5,8 @@
 **Date:** 23 October 2026  
 **Subject:** Lena Huber's Morning Triage & Catastrophe Operating System (Munich Hailstorm, 14 July 2026)  
 **Live Production Cockpit:** [https://integral-claims-cockpit.vercel.app](https://integral-claims-cockpit.vercel.app) *(Public, HTTP 200, zero login barrier)*  
+**Video Walkthrough Recording (MP4):** [https://integral-claims-cockpit.vercel.app/kumulus_cockpit_walkthrough.mp4](https://integral-claims-cockpit.vercel.app/kumulus_cockpit_walkthrough.mp4)  
+**Loom Recording Script & Cue Sheet:** [RECORDING_SCRIPT.md](file:///Users/bidya/Documents/rojgar/integral-claims-cockpit/RECORDING_SCRIPT.md)  
 **GitHub Repository:** [https://github.com/bidya271/integral-kumulus-cockpit](https://github.com/bidya271/integral-kumulus-cockpit)  
 
 ---
